@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/auth_widgets.dart';
+import '../widgets/navigation.dart';
 
 class ProfileDetailScreen extends StatelessWidget {
   const ProfileDetailScreen({super.key, required this.mode});
@@ -27,7 +28,7 @@ class DetailScaffold extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-            color: const Color(0xff0d0b8e),
+            color: const Color(0xff155bb2),
             child: Row(
               children: [
                 IconButton(
@@ -147,7 +148,7 @@ class _PasswordUpdateViewState extends State<PasswordUpdateView> {
   );
 
   void _showUpdated() => Navigator.of(context).pushReplacement(
-    MaterialPageRoute<void>(builder: (_) => const PasswordUpdatedScreen()),
+    noAnimationRoute((_) => const PasswordUpdatedScreen()),
   );
 }
 
@@ -250,11 +251,11 @@ class DetailField extends StatelessWidget {
               vertical: 11,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xffeeeeee)),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xffeeeeee)),
             ),
           ),
@@ -292,7 +293,7 @@ class PasswordRequirements extends StatelessWidget {
     padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
     decoration: BoxDecoration(
       color: const Color(0xffeeeeee),
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(12),
     ),
     child: const Column(
       crossAxisAlignment: CrossAxisAlignment.start,

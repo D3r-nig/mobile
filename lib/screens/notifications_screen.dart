@@ -4,57 +4,96 @@ import '../widgets/app_nav_bar.dart';
 import '../widgets/navigation.dart';
 import 'scan_screen.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  String filter = 'All';
+  final unread = <String>{
+    'Report #1021 Updated',
+    'Maintenance Completed',
+    'Lab 3 Temporary Closure',
+  };
+
+  static const notices = [
+    _NoticeData(Icons.info_outline, 'Report #1021 Updated', 'Your report #1021 was updated. No display on monitor - PC - 001 has been changed to In Progress.', 'Just now', 'Today', Color(0xff4c9df2)),
+    _NoticeData(Icons.check_circle_outline, 'Maintenance Completed', 'Hardware diagnostics and updates successfully completed on PC - 001 in Lab 306.', '2 hours ago', 'Today', Color(0xff248a49)),
+    _NoticeData(Icons.warning_amber_rounded, 'Lab 3 Temporary Closure', 'Computer Lab 3 will be closed for scheduled hardware maintenance on Aug 20.', '1 day ago', 'Yesterday', Color(0xffb7791f)),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = notices.where((notice) => filter == 'All' || unread.contains(notice.title)).toList();
+    final groups = visible.map((notice) => notice.group).toSet();
+
+    return Scaffold(
     body: SafeArea(
       child: Column(
         children: [
-          const ScreenHeader(title: 'Notification'),
+          const ScreenHeader(title: 'Notifications'),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.all(12),
-              children: const [
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
+              children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Status Timeline',
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Text(
-                      'Mark all as read',
-                      style: TextStyle(fontSize: 8, color: Color(0xff397eff)),
-                    ),
+                    const Expanded(child: Text('Inbox', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Color(0xff17243a)))),
+                    Text('${unread.length} unread', style: const TextStyle(fontSize: 13, color: Color(0xff155bb2), fontWeight: FontWeight.w700)),
                   ],
                 ),
-                SizedBox(height: 10),
-                Notice(
-                  icon: Icons.info_outline,
-                  title: 'Report #1021 Updated',
-                  body: 'Your report #1021 was updated. No display on monitor - PC - 001 has been changed to In Progress.',
-                  time: 'Just now',
-                  color: Color(0xff4c9df2),
+                const Padding(
+                  padding: EdgeInsets.only(top: 4),
+                  child: Text('Status Timeline', style: TextStyle(fontSize: 13, color: Color(0xff66758a), fontWeight: FontWeight.w700)),
                 ),
-                Notice(
-                  icon: Icons.check_circle_outline,
-                  title: 'Maintenance Completed',
-                  body: 'Hardware diagnostics and updates successfully completed on PC - 001 in Lab 306.',
-                  time: '2 hours ago',
-                  color: Color(0xff54d769),
+                const SizedBox(height: 14),
+                Row(
+                  children: ['All', 'Unread'].map((value) => Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(right: value == 'All' ? 8 : 0),
+                      child: OutlinedButton(
+                        onPressed: () => setState(() => filter = value),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: filter == value ? const Color(0xffe8f1fb) : Colors.white,
+                          foregroundColor: filter == value ? const Color(0xff155bb2) : const Color(0xff66758a),
+                          side: BorderSide(color: filter == value ? const Color(0xffb9d4f0) : const Color(0xffe0e7ef)),
+                        ),
+                        child: Text(value),
+                      ),
+                    ),
+                  )).toList(),
                 ),
-                Notice(
-                  icon: Icons.warning_amber_rounded,
-                  title: 'Lab 3 Temporary Closure',
-                  body: 'Computer Lab 3 will be closed for scheduled hardware maintenance on Aug 20.',
-                  time: '1 day ago',
-                  color: Color(0xffe3b31f),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: unread.isEmpty ? null : () => setState(unread.clear),
+                    child: const Text('Mark all as read'),
+                  ),
                 ),
+                if (visible.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 42),
+                    child: Center(child: Text('You are all caught up', style: TextStyle(fontSize: 14, color: Color(0xff52657f), fontWeight: FontWeight.w700))),
+                  )
+                else
+                  for (final group in groups) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8, top: 4),
+                      child: Text(group, style: const TextStyle(fontSize: 13, color: Color(0xff66758a), fontWeight: FontWeight.w800)),
+                    ),
+                    ...visible.where((notice) => notice.group == group).map((notice) => Notice(
+                      icon: notice.icon,
+                      title: notice.title,
+                      body: notice.body,
+                      time: notice.time,
+                      color: notice.color,
+                      unread: unread.contains(notice.title),
+                      onOpened: () => setState(() => unread.remove(notice.title)),
+                    )),
+                  ],
               ],
             ),
           ),
@@ -66,6 +105,14 @@ class NotificationsScreen extends StatelessWidget {
       ),
     ),
   );
+  }
+}
+
+class _NoticeData {
+  const _NoticeData(this.icon, this.title, this.body, this.time, this.group, this.color);
+  final IconData icon;
+  final String title, body, time, group;
+  final Color color;
 }
 
 class Notice extends StatelessWidget {
@@ -76,69 +123,77 @@ class Notice extends StatelessWidget {
     required this.body,
     required this.time,
     required this.color,
+    required this.unread,
+    required this.onOpened,
   });
   final IconData icon;
   final String title, body, time;
   final Color color;
+  final bool unread;
+  final VoidCallback onOpened;
 
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: () => Navigator.of(context).push(
-      PageRouteBuilder<void>(
-        pageBuilder: (_, __, ___) => NotificationDetailsScreen(
-          title: title,
-          body: body,
-          time: time,
-          icon: icon,
-          color: color,
+    onTap: () {
+      onOpened();
+      Navigator.of(context).push(
+        noAnimationRoute(
+          (_) => NotificationDetailsScreen(
+            title: title,
+            body: body,
+            time: time,
+            icon: icon,
+            color: color,
+          ),
         ),
-        transitionDuration: const Duration(milliseconds: 220),
-        reverseTransitionDuration: const Duration(milliseconds: 220),
-        transitionsBuilder: (_, animation, __, child) => FadeTransition(
-          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-          child: child,
-        ),
-      ),
-    ),
+      );
+    },
     child: Container(
       margin: const EdgeInsets.only(bottom: 9),
-      padding: const EdgeInsets.all(9),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: unread ? const Color(0xfff2f8ff) : Colors.white,
         border: Border.all(color: const Color(0xffeeeeee)),
-        borderRadius: BorderRadius.circular(7),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(width: 7),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color.withAlpha(28),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 21),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    Expanded(child: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800))),
+                    if (unread) const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(color: Color(0xff155bb2), shape: BoxShape.circle),
+                        child: SizedBox(width: 8, height: 8),
                       ),
                     ),
                     Text(
                       time,
                       style: const TextStyle(
-                        fontSize: 7,
-                        color: Color(0xff777777),
+                        fontSize: 10,
+                        color: Color(0xff7b8796),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 3),
-                Text(body, style: const TextStyle(fontSize: 8)),
+                Text(body, style: const TextStyle(fontSize: 13, color: Color(0xff52657f), height: 1.35)),
               ],
             ),
           ),
@@ -171,7 +226,7 @@ class NotificationDetailsScreen extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            color: const Color(0xff0d0b8e),
+            color: const Color(0xff155bb2),
             padding: const EdgeInsets.fromLTRB(12, 20, 12, 22),
             child: Row(
               children: [
@@ -188,8 +243,8 @@ class NotificationDetailsScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),

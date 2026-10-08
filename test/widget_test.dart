@@ -11,9 +11,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:itlabcare/main.dart';
 import 'package:itlabcare/widgets/auth_widgets.dart';
 
+Future<void> pumpApp(WidgetTester tester) async {
+  await tester.pumpWidget(const ItlabcareApp());
+  await tester.pump(const Duration(milliseconds: 2700));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('shows the ITLABCARE login screen', (tester) async {
-    await tester.pumpWidget(const ItlabcareApp());
+    await pumpApp(tester);
 
     expect(find.text('ITLABCARE'), findsOneWidget);
     expect(find.text('Welcome Back!'), findsOneWidget);
@@ -22,7 +28,7 @@ void main() {
   });
 
   testWidgets('can move from login to sign up and verification', (tester) async {
-    await tester.pumpWidget(const ItlabcareApp());
+    await pumpApp(tester);
 
     await tester.tap(find.text('Sign Up'));
     await tester.pumpAndSettle();
@@ -36,7 +42,7 @@ void main() {
   });
 
   testWidgets('opens the teacher dashboard from sign in', (tester) async {
-    await tester.pumpWidget(const ItlabcareApp());
+    await pumpApp(tester);
 
     await tester.tap(find.text('Sign In'));
     await tester.pumpAndSettle();
@@ -45,10 +51,12 @@ void main() {
     expect(find.text('Quick Actions'), findsOneWidget);
     expect(find.text('Summary'), findsOneWidget);
     expect(find.text('Scan QR Code'), findsOneWidget);
+    expect(find.text('Start with a scan'), findsOneWidget);
+    expect(find.text('Activity overview'), findsOneWidget);
   });
 
   testWidgets('bottom navigation moves between dashboard sections', (tester) async {
-    await tester.pumpWidget(const ItlabcareApp());
+    await pumpApp(tester);
     await tester.tap(find.text('Sign In'));
     await tester.pumpAndSettle();
 
@@ -59,6 +67,7 @@ void main() {
     await tester.tap(find.text('Profile'));
     await tester.pumpAndSettle();
     expect(find.text('Sir Alexander'), findsOneWidget);
+    expect(find.text('Teacher account'), findsOneWidget);
 
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
@@ -66,7 +75,7 @@ void main() {
   });
 
   testWidgets('opens the profile detail forms', (tester) async {
-    await tester.pumpWidget(const ItlabcareApp());
+    await pumpApp(tester);
     await tester.tap(find.text('Sign In'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Profile'));
@@ -85,12 +94,14 @@ void main() {
   });
 
   testWidgets('opens and closes the notification details screen', (tester) async {
-    await tester.pumpWidget(const ItlabcareApp());
+    await pumpApp(tester);
     await tester.tap(find.text('Sign In'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Notifications').at(1));
     await tester.pumpAndSettle();
 
+    expect(find.text('3 unread'), findsOneWidget);
+    expect(find.text('Unread'), findsOneWidget);
     await tester.tap(find.text('Report #1021 Updated').first);
     await tester.pumpAndSettle();
 
@@ -104,7 +115,7 @@ void main() {
   });
 
   testWidgets('opens computer details after a successful scan', (tester) async {
-    await tester.pumpWidget(const ItlabcareApp());
+    await pumpApp(tester);
     await tester.tap(find.text('Sign In'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Scan'));
@@ -120,12 +131,14 @@ void main() {
   });
 
   testWidgets('filters reports by category tab', (tester) async {
-    await tester.pumpWidget(const ItlabcareApp());
+    await pumpApp(tester);
     await tester.tap(find.text('Sign In'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Reports'));
     await tester.pumpAndSettle();
 
+    expect(find.text('Reports overview'), findsOneWidget);
+    expect(find.text('3 total'), findsOneWidget);
     expect(find.text('#1021'), findsOneWidget);
     expect(find.text('#1067'), findsOneWidget);
     expect(find.text('#1251'), findsOneWidget);
@@ -138,7 +151,7 @@ void main() {
   });
 
   testWidgets('opens and submits a computer problem report', (tester) async {
-    await tester.pumpWidget(const ItlabcareApp());
+    await pumpApp(tester);
     await tester.tap(find.text('Sign In'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Lab Computers'));
@@ -159,7 +172,7 @@ void main() {
   });
 
   testWidgets('opens preference and support screens from Profile', (tester) async {
-    await tester.pumpWidget(const ItlabcareApp());
+    await pumpApp(tester);
     await tester.tap(find.text('Sign In'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Profile'));

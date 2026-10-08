@@ -203,15 +203,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     _timer = Timer(const Duration(milliseconds: 1200), () {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        PageRouteBuilder<void>(
-          pageBuilder: (_, __, ___) => const ComputerDetailsScreen(),
-          transitionDuration: const Duration(milliseconds: 180),
-          reverseTransitionDuration: const Duration(milliseconds: 180),
-          transitionsBuilder: (_, animation, __, child) => FadeTransition(
-            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-            child: child,
-          ),
-        ),
+        noAnimationRoute((_) => const ComputerDetailsScreen()),
       );
     });
   }
@@ -481,22 +473,7 @@ class ComputerListScreen extends StatelessWidget {
                   final computer = computers[index];
                   return InkWell(
                     onTap: () => Navigator.of(context).push(
-                      PageRouteBuilder<void>(
-                        pageBuilder: (_, __, ___) =>
-                            const ComputerDetailsScreen(),
-                        transitionDuration: const Duration(milliseconds: 180),
-                        reverseTransitionDuration: const Duration(
-                          milliseconds: 180,
-                        ),
-                        transitionsBuilder: (_, animation, __, child) =>
-                            FadeTransition(
-                              opacity: CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeOut,
-                              ),
-                              child: child,
-                            ),
-                      ),
+                      noAnimationRoute((_) => const ComputerDetailsScreen()),
                     ),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -600,16 +577,28 @@ class ScreenHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.symmetric(vertical: 32),
-    color: const Color(0xff0d0b8e),
-    child: Text(
-      title,
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-      ),
+    padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+    decoration: const BoxDecoration(
+      color: Color(0xff155bb2),
+      borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
+    ),
+    child: Row(
+      children: [
+        const SizedBox(width: 40),
+        Expanded(
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              height: 1.15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        const SizedBox(width: 40),
+      ],
     ),
   );
 }

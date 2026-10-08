@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/auth_widgets.dart';
+import '../widgets/navigation.dart';
 import '../widgets/brand_mark.dart';
 import 'dashboard_screen.dart';
 
@@ -17,7 +18,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool hidePassword = true;
   bool hideConfirm = true;
   static const navy = Color(0xff11112a);
-  static const action = Color(0xff3937e8);
+  static const action = Color(0xff155bb2);
 
   void showView(AuthView next) => setState(() => view = next);
 
@@ -31,7 +32,7 @@ class _AuthScreenState extends State<AuthScreen> {
             24,
             MediaQuery.sizeOf(context).height < 700
                 ? 24
-                : (view == AuthView.signUp ? 32 : 80),
+                : (view == AuthView.signUp ? 28 : 48),
             24,
             28,
           ),
@@ -52,14 +53,26 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Widget loginView() => Column(
     children: [
-      const SizedBox(height: 22),
-      const BrandMark(size: 132),
-      const SizedBox(height: 18),
+      const SizedBox(height: 10),
+      TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeOutBack,
+        builder: (context, value, child) => Opacity(
+          opacity: value.clamp(0.0, 1.0).toDouble(),
+          child: Transform.scale(
+            scale: 0.86 + (value * 0.14),
+            child: child,
+          ),
+        ),
+        child: const BrandMark(size: 104),
+      ),
+      const SizedBox(height: 12),
       const Text(
         'ITLABCARE',
         style: TextStyle(
           color: Color(0xff155bb2),
-          fontSize: 20,
+        fontSize: 19,
           fontWeight: FontWeight.w800,
           letterSpacing: .5,
         ),
@@ -80,21 +93,21 @@ class _AuthScreenState extends State<AuthScreen> {
           fontWeight: FontWeight.w500,
         ),
       ),
-      const SizedBox(height: 18),
+      const SizedBox(height: 22),
       const Text(
         'Welcome Back!',
         style: TextStyle(
           color: navy,
-          fontSize: 16,
+          fontSize: 24,
           fontWeight: FontWeight.w800,
         ),
       ),
-      const SizedBox(height: 2),
+      const SizedBox(height: 5),
       const Text(
         'Please sign in to continue',
-        style: TextStyle(color: Color(0xff747474), fontSize: 11),
+        style: TextStyle(color: Color(0xff66758a), fontSize: 14),
       ),
-      const SizedBox(height: 24),
+      const SizedBox(height: 22),
       const Field(label: 'Email or Username'),
       const SizedBox(height: 9),
       Field(
@@ -119,9 +132,9 @@ class _AuthScreenState extends State<AuthScreen> {
       ActionButton(
         label: 'Sign In',
         onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(
+          noAnimationRoute(
             settings: const RouteSettings(name: '/dashboard'),
-            builder: (_) => const DashboardScreen(),
+            (_) => const DashboardScreen(),
           ),
         ),
       ),
@@ -140,7 +153,12 @@ class _AuthScreenState extends State<AuthScreen> {
         title: 'Create Account',
         onBack: () => showView(AuthView.login),
       ),
-      const SizedBox(height: 10),
+      const SizedBox(height: 4),
+      const Text(
+        'Set up your ITLabCare account',
+        style: TextStyle(color: Color(0xff66758a), fontSize: 14),
+      ),
+      const SizedBox(height: 18),
       const SizedBox(
         width: 82,
         height: 82,
@@ -255,7 +273,7 @@ class _AuthScreenState extends State<AuthScreen> {
         child: const Text(
           'Resend Email (00:45)',
           style: TextStyle(
-            color: Color(0xff6d6af0),
+            color: Color(0xff155bb2),
             fontSize: 11,
             fontWeight: FontWeight.w600,
           ),

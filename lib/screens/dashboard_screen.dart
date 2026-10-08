@@ -16,20 +16,20 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   static const ink = Color(0xff11112a);
-  static const blue = Color(0xff0d0b8e);
+  static const blue = Color(0xff155bb2);
 
   void open(Widget page, int target) =>
-      Navigator.of(context).push(slideRoute(page, from: 0, to: target));
+      Navigator.of(context).push(noAnimationRoute((_) => page));
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: const Color(0xff222222),
+    backgroundColor: const Color(0xfff6f8fb),
     body: SafeArea(
       child: Align(
         alignment: Alignment.topCenter,
         child: Container(
           width: double.infinity,
-          color: Colors.white,
+          color: const Color(0xfff6f8fb),
           child: LayoutBuilder(
             builder: (context, constraints) {
               // Keep phones fluid while giving tablets a wider centered dashboard.
@@ -89,7 +89,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Text(
                               'LABCARE',
                               style: TextStyle(
-                                color: Color(0xff3896ff),
+                              color: Color(0xff8cc5ff),
                                 fontSize: isTablet ? 18 : 20,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -101,23 +101,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               icon: const Icon(
                                 Icons.notifications_none,
                                 color: Colors.white,
-                                size: 20,
+                                size: 24,
                               ),
                             ),
                           ],
                         ),
                         SizedBox(height: isTablet ? 22 : 30),
                         const Text(
-                          'Hello, Teacher Juan!',
+                          'Hello, Teacher Xander!',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 16,
+                            fontSize: 24,
+                            height: 1.1,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         const Text(
                           'What would you like to do today?',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
+                          style: TextStyle(color: Color(0xffdbeafe), fontSize: 14, height: 1.4),
                         ),
                       ],
                     ),
@@ -128,10 +129,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
+                          'Start with a scan',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        FeaturedAction(
+                          onTap: () => open(const ScanScreen(), 2),
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
                           'Quick Actions',
                           style: TextStyle(
                             color: ink,
-                            fontSize: 14,
+                            fontSize: 18,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -139,19 +153,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Row(
                           children: [
                             QuickAction(
-                              icon: Icons.qr_code_2,
-                              label: 'Scan QR Code',
-                              color: blue,
+                              icon: Icons.assignment_outlined,
+                              label: 'My Reports',
+                              color: const Color(0xff248a49),
                               height: actionHeight,
-                              onTap: () => open(const ScanScreen(), 2),
+                              onTap: () => open(const ReportsScreen(), 1),
                             ),
                             const SizedBox(width: 12),
                             QuickAction(
-                              icon: Icons.assignment_outlined,
-                              label: 'My Reports',
-                              color: const Color(0xff3d781c),
+                              icon: Icons.desktop_windows_outlined,
+                              label: 'Lab Computers',
+                              color: const Color(0xff6b4acb),
                               height: actionHeight,
-                              onTap: () => open(const ReportsScreen(), 1),
+                              onTap: () => open(const ComputerListScreen(), 2),
                             ),
                           ],
                         ),
@@ -161,30 +175,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             QuickAction(
                               icon: Icons.notifications_none,
                               label: 'Notifications',
-                              color: const Color(0xffa9a900),
+                              color: const Color(0xffb7791f),
                               height: actionHeight,
-                              onTap: () => open(const NotificationsScreen(), 3),
-                            ),
-                            const SizedBox(width: 12),
-                            QuickAction(
-                              icon: Icons.desktop_windows_outlined,
-                              label: 'Lab Computers',
-                              color: const Color(0xff3e1398),
-                              height: actionHeight,
-                              onTap: () => open(const ComputerListScreen(), 2),
+                              onTap: () =>
+                                  open(const NotificationsScreen(), 3),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 22),
                         const Text(
                           'Summary',
                           style: TextStyle(
                             color: ink,
-                            fontSize: 14,
+                            fontSize: 18,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(height: 5),
+                        const Padding(
+                          padding: EdgeInsets.only(top: 4, bottom: 5),
+                          child: Text(
+                            'Activity overview',
+                            style: TextStyle(
+                              color: Color(0xff66758a),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
                         SummaryRow(
                           icon: Icons.assignment_outlined,
                           label: 'My Reports',
@@ -260,28 +277,90 @@ class QuickAction extends StatelessWidget {
   Widget build(BuildContext context) => Expanded(
     child: Material(
       color: Colors.white,
-      elevation: 3,
-      borderRadius: BorderRadius.circular(6),
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: Color(0xffe0e7ef)),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(14),
         child: SizedBox(
           height: height,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: color, size: 31),
-              const SizedBox(height: 3),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color.withAlpha(24),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 25),
+              ),
+              const SizedBox(height: 7),
               Text(
                 label,
                 style: TextStyle(
                   color: color,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    ),
+  );
+}
+
+class FeaturedAction extends StatelessWidget {
+  const FeaturedAction({super.key, required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: const Color(0xff155bb2),
+    borderRadius: BorderRadius.circular(16),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: Color(0x26ffffff),
+              child: Icon(Icons.qr_code_scanner, color: Colors.white, size: 27),
+            ),
+            SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Scan QR Code',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Identify a lab computer and manage it',
+                    style: TextStyle(color: Color(0xffdbeafe), fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+          ],
         ),
       ),
     ),
@@ -305,11 +384,12 @@ class SummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     height: height,
-    margin: const EdgeInsets.only(bottom: 5),
-    padding: const EdgeInsets.symmetric(horizontal: 12),
+    margin: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.symmetric(horizontal: 14),
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: const Color(0xffe0e7ef)),
       boxShadow: const [
         BoxShadow(
           color: Color(0x18000000),
@@ -320,20 +400,28 @@ class SummaryRow extends StatelessWidget {
     ),
     child: Row(
       children: [
-        Icon(icon, size: 19, color: color),
-        const SizedBox(width: 8),
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: color.withAlpha(24),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 18, color: color),
+        ),
+        const SizedBox(width: 10),
         Text(
           label,
           style: TextStyle(
             color: color,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
           ),
         ),
         const Spacer(),
         Text(
           count,
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
         ),
       ],
     ),

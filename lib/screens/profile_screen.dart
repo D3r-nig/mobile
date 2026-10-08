@@ -23,7 +23,7 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               children: [
                 const ProfileCard(),
-                const SectionTitle(text: 'ACCOUNT SETTINGS'),
+                const SectionTitle(text: 'Account settings'),
                 SettingRow(
                   icon: Icons.person_outline,
                   label: 'Personal Information',
@@ -50,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 15),
-                const SectionTitle(text: 'PREFERENCES & SUPPORT'),
+                const SectionTitle(text: 'Preferences & support'),
                 SettingRow(
                   icon: Icons.notifications_none,
                   label: 'App Notifications',
@@ -93,7 +93,7 @@ void _showLogoutDialog(BuildContext context) {
     barrierDismissible: true,
     barrierLabel: 'Close logout dialog',
     barrierColor: Colors.transparent,
-    transitionDuration: const Duration(milliseconds: 220),
+    transitionDuration: Duration.zero,
     pageBuilder: (context, animation, secondaryAnimation) => Stack(
       children: [
         Positioned.fill(
@@ -105,47 +105,59 @@ void _showLogoutDialog(BuildContext context) {
         Center(
           child: Material(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(20),
             clipBehavior: Clip.antiAlias,
             child: SizedBox(
-              width: 220,
+              width: 340,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+                padding: const EdgeInsets.fromLTRB(26, 24, 26, 22),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.logout, color: Colors.red, size: 28),
-                    const SizedBox(height: 8),
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: const Color(0xffffeeee),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.logout, color: Colors.red, size: 30),
+                    ),
+                    const SizedBox(height: 16),
                     const Text(
                       'Log Out?',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 21,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 10),
                     const Text(
                       'You\'ll be signed out of your account and\nwill need to log in again to continue.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 8, color: Color(0xff555555)),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Color(0xff66758a),
+                        height: 1.45,
+                      ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 22),
                     Row(
                       children: [
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () => Navigator.of(context).pop(),
                             style: OutlinedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(30),
-                              padding: EdgeInsets.zero,
+                              minimumSize: const Size.fromHeight(48),
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
                               side: const BorderSide(color: Color(0xffdddddd)),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                             child: const Text(
                               'Cancel',
-                              style: TextStyle(fontSize: 9, color: Colors.black),
+                              style: TextStyle(fontSize: 13, color: Color(0xff344054), fontWeight: FontWeight.w700),
                             ),
                           ),
                         ),
@@ -153,25 +165,23 @@ void _showLogoutDialog(BuildContext context) {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const AuthScreen(),
-                              ),
+                              noAnimationRoute((_) => const AuthScreen()),
                               (_) => false,
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
                               foregroundColor: Colors.white,
                               elevation: 0,
-                              minimumSize: const Size.fromHeight(30),
-                              padding: EdgeInsets.zero,
+                              minimumSize: const Size.fromHeight(48),
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                             child: const Text(
                               'Log Out',
                               style: TextStyle(
-                                fontSize: 9,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -187,16 +197,7 @@ void _showLogoutDialog(BuildContext context) {
         ),
       ],
     ),
-    transitionBuilder: (context, animation, secondaryAnimation, child) =>
-        FadeTransition(
-          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.92, end: 1).animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
-            ),
-            child: child,
-          ),
-        ),
+    transitionBuilder: (context, animation, secondaryAnimation, child) => child,
   );
 }
 
@@ -204,36 +205,32 @@ class ProfileCard extends StatelessWidget {
   const ProfileCard({super.key});
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(10),
-    margin: const EdgeInsets.only(bottom: 14),
+    margin: const EdgeInsets.only(bottom: 22),
+    padding: const EdgeInsets.all(18),
     decoration: BoxDecoration(
-      color: const Color(0xffeeeeee),
-      borderRadius: BorderRadius.circular(7),
+      color: const Color(0xff155bb2),
+      borderRadius: BorderRadius.circular(18),
     ),
-    child: const Row(
+    child: Row(
       children: [
-        CircleAvatar(
-          radius: 22,
-          backgroundColor: Color(0xff72a1bc),
-          child: Icon(Icons.person, color: Colors.white),
+        const CircleAvatar(
+          radius: 30,
+          backgroundColor: Color(0xffe8f1fb),
+          child: Icon(Icons.person, color: Color(0xff155bb2), size: 32),
         ),
-        SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Sir Alexander',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
-            ),
-            Text(
-              'IT 2 (CITE Department)',
-              style: TextStyle(fontSize: 8, color: Color(0xff2479d0)),
-            ),
-            Text(
-              'Teacher.juan@gmail.com',
-              style: TextStyle(fontSize: 8, color: Color(0xff888888)),
-            ),
-          ],
+        const SizedBox(width: 14),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Sir Alexander', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+              SizedBox(height: 4),
+              Text('Teacher account', style: TextStyle(color: Color(0xffdbeafe), fontSize: 13, fontWeight: FontWeight.w700)),
+              SizedBox(height: 3),
+              Text('IT 2 • CITE Department', style: TextStyle(color: Color(0xffdbeafe), fontSize: 12)),
+              Text('Teacher.juan@gmail.com', style: TextStyle(color: Color(0xffdbeafe), fontSize: 12)),
+            ],
+          ),
         ),
       ],
     ),
@@ -249,9 +246,10 @@ class SectionTitle extends StatelessWidget {
     child: Text(
       text,
       style: const TextStyle(
-        fontSize: 8,
-        color: Color(0xff777777),
-        fontWeight: FontWeight.w600,
+        fontSize: 13,
+        color: Color(0xff66758a),
+        fontWeight: FontWeight.w800,
+        letterSpacing: .2,
       ),
     ),
   );
@@ -274,30 +272,38 @@ class SettingRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(5),
+      borderRadius: BorderRadius.circular(12),
     child: Container(
-      height: 39,
-      margin: const EdgeInsets.only(bottom: 3),
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      height: 62,
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color(0xffeeeeee)),
-        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: const Color(0xffe0e7ef)),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 17,
-            color: danger ? Colors.red : const Color(0xff2920d8),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: danger ? const Color(0xffffeeee) : const Color(0xffe8f1fb),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: danger ? Colors.red : const Color(0xff155bb2),
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
                 color: danger ? Colors.red : Colors.black,
               ),
             ),
@@ -305,10 +311,10 @@ class SettingRow extends StatelessWidget {
           if (detail != null)
             Text(
               detail!,
-              style: const TextStyle(fontSize: 7, color: Color(0xff777777)),
+                style: const TextStyle(fontSize: 12, color: Color(0xff66758a)),
             ),
           const SizedBox(width: 5),
-          const Icon(Icons.chevron_right, size: 15),
+          const Icon(Icons.chevron_right, size: 20, color: Color(0xff9aa7b5)),
         ],
       ),
     ),

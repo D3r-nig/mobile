@@ -55,8 +55,19 @@ class _ReportsScreenState extends State<ReportsScreen> {
             const ScreenHeader(title: 'My Reports'),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
                 children: [
+                  const Text(
+                    'Reports overview',
+                    style: TextStyle(
+                      color: Color(0xff17243a),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ReportOverview(reports: reports),
+                  const SizedBox(height: 22),
                   ReportTabs(
                     selected: selectedTab,
                     onSelected: (tab) => setState(() => selectedTab = tab),
@@ -66,10 +77,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       padding: EdgeInsets.only(top: 48),
                       child: Center(
                         child: Text(
-                          'No reports in this category',
+                          'No reports here yet',
                           style: TextStyle(
-                            color: Color(0xff777777),
-                            fontSize: 11,
+                            color: Color(0xff52657f),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -100,29 +112,94 @@ class ReportTabs extends StatelessWidget {
   final ValueChanged<String> onSelected;
 
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisAlignment: MainAxisAlignment.spaceAround,
-    children: ['All', 'Pending', 'In Progress', 'Completed']
-        .map(
-          (tab) => InkWell(
+  Widget build(BuildContext context) => SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: Row(
+      children: ['All', 'Pending', 'In Progress', 'Completed']
+          .map(
+            (tab) => Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: InkWell(
             key: ValueKey('report-tab-$tab'),
             onTap: () => onSelected(tab),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 160),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+              decoration: BoxDecoration(
+                color: tab == selected ? const Color(0xffe8f1fb) : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: tab == selected
+                      ? const Color(0xffb9d4f0)
+                      : const Color(0xffe0e7ef),
+                ),
+              ),
               child: Text(
                 tab,
                 style: TextStyle(
                   color: tab == selected
-                      ? const Color(0xff3937e8)
-                      : Colors.black,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
+                      ? const Color(0xff155bb2)
+                      : const Color(0xff66758a),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
-          ),
-        )
-        .toList(),
+              ),
+            ),
+          )
+          .toList(),
+    ),
+  );
+}
+
+class ReportOverview extends StatelessWidget {
+  const ReportOverview({super.key, required this.reports});
+
+  final List<ReportData> reports;
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = reports.where((report) => report.status == 'Pending').length;
+    final active = reports.where((report) => report.status == 'In Progress').length;
+    final completed = reports.where((report) => report.status == 'Completed').length;
+
+    return Row(
+      children: [
+        _OverviewItem(label: '${reports.length} total', value: '${reports.length}', color: const Color(0xff155bb2)),
+        _OverviewItem(label: 'Pending', value: '$pending', color: const Color(0xffb7791f)),
+        _OverviewItem(label: 'Active', value: '$active', color: const Color(0xff1b9bc2)),
+        _OverviewItem(label: 'Done', value: '$completed', color: const Color(0xff248a49)),
+      ],
+    );
+  }
+}
+
+class _OverviewItem extends StatelessWidget {
+  const _OverviewItem({required this.label, required this.value, required this.color});
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 8),
+      decoration: BoxDecoration(
+        color: color.withAlpha(18),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withAlpha(45)),
+      ),
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 2),
+          Text(label, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xff66758a), fontSize: 11, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    ),
   );
 }
 
@@ -151,36 +228,29 @@ class ReportCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(7),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x18000000),
-            blurRadius: 7,
-            offset: Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xffe0e7ef)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
-                data.id,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              const Icon(Icons.assignment_outlined, color: Color(0xff155bb2), size: 22),
+              const SizedBox(width: 8),
+              Text(data.id, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                color: data.color.withAlpha(45),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: data.color.withAlpha(35),
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Text(
                   data.status,
                   style: TextStyle(
                     color: data.color,
-                    fontSize: 8,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -188,18 +258,16 @@ class ReportCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 3),
-          Text(
-            data.lab,
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700),
-          ),
+          Text(data.detail, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xff17243a))),
           const SizedBox(height: 4),
-          Text(data.detail, style: const TextStyle(fontSize: 9)),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              data.date,
-              style: const TextStyle(fontSize: 8, fontStyle: FontStyle.italic),
-            ),
+          Row(
+            children: [
+              const Icon(Icons.desktop_windows_outlined, size: 16, color: Color(0xff66758a)),
+              const SizedBox(width: 5),
+              Text(data.lab, style: const TextStyle(fontSize: 13, color: Color(0xff52657f))),
+              const Spacer(),
+              Text(data.date, style: const TextStyle(fontSize: 12, color: Color(0xff7b8796))),
+            ],
           ),
         ],
       ),

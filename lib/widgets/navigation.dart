@@ -21,42 +21,19 @@ void navigateFrom(BuildContext context, int index, int selected) {
     _ => null,
   };
   if (page != null) {
-    Navigator.of(context).push(slideRoute(page, from: selected, to: index));
+    Navigator.of(context).push(noAnimationRoute((_) => page));
   }
 }
 
-PageRouteBuilder<void> slideRoute(
-  Widget page, {
-  required int from,
-  required int to,
-}) {
-  return PageRouteBuilder<void>(
-    pageBuilder: (_, _, _) => page,
-    transitionDuration: const Duration(milliseconds: 180),
-    reverseTransitionDuration: const Duration(milliseconds: 180),
-    transitionsBuilder: (_, animation, _, child) {
-      final eased = CurvedAnimation(parent: animation, curve: Curves.easeOut);
-      return FadeTransition(
-        opacity: eased,
-        child: ScaleTransition(
-          scale: Tween<double>(begin: .985, end: 1).animate(eased),
-          child: child,
-        ),
-      );
-    },
-  );
-}
+PageRoute<T> noAnimationRoute<T>(WidgetBuilder builder, {RouteSettings? settings}) =>
+    PageRouteBuilder<T>(
+      settings: settings,
+      pageBuilder: (context, _, __) => builder(context),
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+      transitionsBuilder: (_, __, ___, child) => child,
+    );
 
 void openDissolve(BuildContext context, Widget page) {
-  Navigator.of(context).push(
-    PageRouteBuilder<void>(
-      pageBuilder: (_, _, _) => page,
-      transitionDuration: const Duration(milliseconds: 225),
-      reverseTransitionDuration: const Duration(milliseconds: 225),
-      transitionsBuilder: (_, animation, _, child) => FadeTransition(
-        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-        child: child,
-      ),
-    ),
-  );
+  Navigator.of(context).push(noAnimationRoute((_) => page));
 }

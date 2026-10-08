@@ -154,7 +154,7 @@ class PreferenceScaffold extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            color: const Color(0xff0d0b8e),
+            color: const Color(0xff155bb2),
             padding: const EdgeInsets.fromLTRB(12, 22, 12, 22),
             child: Row(
               children: [
@@ -172,8 +172,8 @@ class PreferenceScaffold extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
@@ -202,9 +202,9 @@ class PreferenceGroupTitle extends StatelessWidget {
     child: Text(
       title,
       style: const TextStyle(
-        fontSize: 8,
-        color: Color(0xff777777),
-        fontWeight: FontWeight.w700,
+        fontSize: 11,
+        color: Color(0xff66758a),
+        fontWeight: FontWeight.w800,
       ),
     ),
   );
@@ -237,14 +237,14 @@ class NotificationToggle extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: const TextStyle(fontSize: 7, color: Color(0xff777777)),
+                style: const TextStyle(fontSize: 11, color: Color(0xff66758a)),
               ),
             ],
           ),
@@ -267,14 +267,14 @@ class FaqRow extends StatelessWidget {
   Widget build(BuildContext context) => ExpansionTile(
     title: Text(
       question,
-      style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600),
+      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
     ),
     tilePadding: const EdgeInsets.symmetric(horizontal: 8),
     childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
     children: const [
       Text(
         'Open the Scan tab from the bottom navigation and follow the instructions shown on screen.',
-        style: TextStyle(fontSize: 8, color: Color(0xff666666)),
+        style: TextStyle(fontSize: 12, color: Color(0xff66758a), height: 1.4),
       ),
     ],
   );
@@ -292,14 +292,14 @@ class ContactRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListTile(
     contentPadding: EdgeInsets.zero,
-    leading: Icon(icon, color: const Color(0xff3937e8), size: 18),
+    leading: Icon(icon, color: const Color(0xff155bb2), size: 22),
     title: Text(
       title,
-      style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700),
+      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
     ),
     subtitle: Text(
       value,
-      style: const TextStyle(fontSize: 8, color: Color(0xff777777)),
+      style: const TextStyle(fontSize: 11, color: Color(0xff66758a)),
     ),
   );
 }

@@ -11,13 +11,21 @@ class Field extends StatelessWidget {
   final bool obscure;
   final VoidCallback? toggle;
 
+  IconData get icon => switch (label) {
+    'Email or Username' || 'Email' => Icons.alternate_email,
+    'Password' || 'Confirm Password' => Icons.lock_outline,
+    'Full Name' => Icons.person_outline,
+    _ => Icons.edit_outlined,
+  };
+
   @override
   Widget build(BuildContext context) => TextField(
     obscureText: obscure,
-    style: const TextStyle(fontSize: 12),
+    style: const TextStyle(fontSize: 14, color: Color(0xff17243a)),
     decoration: InputDecoration(
-      hintText: label,
-      hintStyle: const TextStyle(color: Color(0xffa4a4a4), fontSize: 10),
+      labelText: label,
+      labelStyle: const TextStyle(color: Color(0xff66758a), fontSize: 13),
+      prefixIcon: Icon(icon, size: 20, color: const Color(0xff66758a)),
       suffixIcon: toggle == null
           ? null
           : IconButton(
@@ -26,23 +34,10 @@ class Field extends StatelessWidget {
                 obscure
                     ? Icons.visibility_outlined
                     : Icons.visibility_off_outlined,
-                size: 17,
-                color: const Color(0xff999999),
+                size: 20,
+                color: const Color(0xff66758a),
               ),
             ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(7),
-        borderSide: const BorderSide(color: Color(0xffeeeeee)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(7),
-        borderSide: const BorderSide(color: Color(0xffeeeeee)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(7),
-        borderSide: const BorderSide(color: Color(0xff3937e8)),
-      ),
     ),
   );
 }
@@ -56,26 +51,18 @@ class RoleField extends StatelessWidget {
     items: const [
       DropdownMenuItem(
         value: 'Teacher',
-        child: Text('Teacher', style: TextStyle(fontSize: 11)),
+        child: Text('Teacher', style: TextStyle(fontSize: 14)),
       ),
       DropdownMenuItem(
         value: 'Student',
-        child: Text('Student', style: TextStyle(fontSize: 11)),
+        child: Text('Student', style: TextStyle(fontSize: 14)),
       ),
     ],
     onChanged: (_) {},
     decoration: const InputDecoration(
       labelText: 'Role',
-      labelStyle: TextStyle(color: Color(0xffaaaaaa), fontSize: 9),
-      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      border: OutlineInputBorder(
-        borderSide: BorderSide(color: Color(0xffeeeeee)),
-        borderRadius: BorderRadius.all(Radius.circular(7)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Color(0xffeeeeee)),
-        borderRadius: BorderRadius.all(Radius.circular(7)),
-      ),
+      labelStyle: TextStyle(color: Color(0xff66758a), fontSize: 12),
+      prefixIcon: Icon(Icons.badge_outlined, color: Color(0xff66758a), size: 20),
     ),
   );
 }
@@ -88,18 +75,18 @@ class ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox(
     width: double.infinity,
-    height: 42,
+    height: 48,
     child: ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xff3937e8),
+        backgroundColor: const Color(0xff155bb2),
         foregroundColor: Colors.white,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       child: Text(
         label,
-        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
       ),
     ),
   );
@@ -120,7 +107,7 @@ class Prompt extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      Text(text, style: const TextStyle(fontSize: 10)),
+      Text(text, style: const TextStyle(fontSize: 13, color: Color(0xff66758a))),
       GestureDetector(
         onTap: onPressed,
         child: Padding(
@@ -128,8 +115,8 @@ class Prompt extends StatelessWidget {
           child: Text(
             action,
             style: const TextStyle(
-              fontSize: 10,
-              color: Color(0xff3937e8),
+              fontSize: 13,
+              color: Color(0xff155bb2),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -149,7 +136,7 @@ class BackHeader extends StatelessWidget {
     children: [
       IconButton(
         onPressed: onBack,
-        icon: const Icon(Icons.arrow_back_ios_new, size: 17),
+        icon: const Icon(Icons.arrow_back_ios_new, size: 20),
       ),
       Expanded(
         child: Text(
@@ -157,7 +144,7 @@ class BackHeader extends StatelessWidget {
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: Color(0xff11112a),
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
         ),

@@ -190,7 +190,7 @@ class ReportSubmittedScreen extends StatelessWidget {
               ActionButton(
                 label: 'View My Reports',
                 onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ReportsScreen()),
+                  noAnimationRoute((_) => const ReportsScreen()),
                 ),
               ),
               TextButton(
@@ -257,13 +257,13 @@ class WorkflowScaffold extends StatelessWidget {
                 : const EdgeInsets.fromLTRB(12, 22, 12, 22),
             decoration: largeHeader
                 ? const BoxDecoration(
-                    color: Color(0xff0d0b8e),
+                    color: Color(0xff155bb2),
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(24),
                       bottomRight: Radius.circular(24),
                     ),
                   )
-                : const BoxDecoration(color: Color(0xff0d0b8e)),
+                : const BoxDecoration(color: Color(0xff155bb2)),
             child: Row(
               children: [
                 IconButton(
@@ -280,8 +280,8 @@ class WorkflowScaffold extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
@@ -318,7 +318,7 @@ class ComputerCard extends StatelessWidget {
     padding: const EdgeInsets.all(10),
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(7),
+      borderRadius: BorderRadius.circular(14),
       boxShadow: const [
         BoxShadow(
           color: Color(0x16000000),
@@ -357,7 +357,7 @@ class InfoRow extends StatelessWidget {
   final Color? valueColor;
   @override
   Widget build(BuildContext context) => Container(
-    height: 34,
+      height: 44,
     padding: const EdgeInsets.symmetric(horizontal: 10),
     decoration: const BoxDecoration(
       color: Colors.white,
@@ -367,12 +367,12 @@ class InfoRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         ),
         const Spacer(),
         Text(
           value,
-          style: TextStyle(fontSize: 8, color: valueColor ?? Colors.black),
+          style: TextStyle(fontSize: 12, color: valueColor ?? const Color(0xff344054), fontWeight: FontWeight.w600),
         ),
       ],
     ),
@@ -396,20 +396,28 @@ class WorkflowButton extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
     onTap: () => onTap(context),
     child: Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: 52,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(7),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 17, color: textColor),
-          const SizedBox(width: 8),
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: textColor.withAlpha(24),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 18, color: textColor),
+          ),
+          const SizedBox(width: 10),
           Text(
             label,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 13,
               color: textColor,
               fontWeight: FontWeight.w700,
             ),
