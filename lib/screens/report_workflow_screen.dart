@@ -100,7 +100,11 @@ class ReportProblemScreen extends StatelessWidget {
           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 5),
-        const RoleField(),
+        const ReportOptionField(
+          initialValue: 'Hardware',
+          options: ['Hardware', 'Software', 'Network', 'Peripheral', 'Other'],
+          icon: Icons.category_outlined,
+        ),
         const SizedBox(height: 10),
         const Text(
           'Describe the Problem',
@@ -149,8 +153,42 @@ class ReportProblemScreen extends StatelessWidget {
           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 5),
-        const RoleField(),
+        const ReportOptionField(
+          initialValue: 'Medium',
+          options: ['Low', 'Medium', 'High'],
+          icon: Icons.flag_outlined,
+        ),
       ],
+    ),
+  );
+}
+
+class ReportOptionField extends StatelessWidget {
+  const ReportOptionField({
+    super.key,
+    required this.initialValue,
+    required this.options,
+    required this.icon,
+  });
+
+  final String initialValue;
+  final List<String> options;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => DropdownButtonFormField<String>(
+    initialValue: initialValue,
+    items: [
+      for (final option in options)
+        DropdownMenuItem(
+          value: option,
+          child: Text(option, style: const TextStyle(fontSize: 14)),
+        ),
+    ],
+    onChanged: (_) {},
+    decoration: InputDecoration(
+      labelStyle: const TextStyle(color: Color(0xff66758a), fontSize: 12),
+      prefixIcon: Icon(icon, color: const Color(0xff66758a), size: 20),
     ),
   );
 }

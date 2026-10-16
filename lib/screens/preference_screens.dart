@@ -120,7 +120,7 @@ class AboutUsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         const Text(
-          'ITLabCare is a computer laboratory management system designed to help teachers and students report, monitor, and resolve laboratory equipment concerns. Our goal is to keep every lab reliable, organized, and ready for learning.',
+          'ITLabCare is a computer laboratory management system designed to help students report, monitor, and resolve laboratory equipment concerns. Our goal is to keep every lab reliable, organized, and ready for learning.',
           textAlign: TextAlign.justify,
           style: TextStyle(fontSize: 9, height: 1.5, color: Color(0xff555555)),
         ),

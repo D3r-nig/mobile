@@ -6,10 +6,16 @@ class Field extends StatelessWidget {
     required this.label,
     this.obscure = false,
     this.toggle,
+    this.controller,
+    this.keyboardType,
+    this.onChanged,
   });
   final String label;
   final bool obscure;
   final VoidCallback? toggle;
+  final TextEditingController? controller;
+  final TextInputType? keyboardType;
+  final ValueChanged<String>? onChanged;
 
   IconData get icon => switch (label) {
     'Email or Username' || 'Email' => Icons.alternate_email,
@@ -20,6 +26,9 @@ class Field extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextField(
+    controller: controller,
+    keyboardType: keyboardType,
+    onChanged: onChanged,
     obscureText: obscure,
     style: const TextStyle(fontSize: 14, color: Color(0xff17243a)),
     decoration: InputDecoration(
@@ -42,35 +51,10 @@ class Field extends StatelessWidget {
   );
 }
 
-class RoleField extends StatelessWidget {
-  const RoleField({super.key});
-
-  @override
-  Widget build(BuildContext context) => DropdownButtonFormField<String>(
-    initialValue: 'Teacher',
-    items: const [
-      DropdownMenuItem(
-        value: 'Teacher',
-        child: Text('Teacher', style: TextStyle(fontSize: 14)),
-      ),
-      DropdownMenuItem(
-        value: 'Student',
-        child: Text('Student', style: TextStyle(fontSize: 14)),
-      ),
-    ],
-    onChanged: (_) {},
-    decoration: const InputDecoration(
-      labelText: 'Role',
-      labelStyle: TextStyle(color: Color(0xff66758a), fontSize: 12),
-      prefixIcon: Icon(Icons.badge_outlined, color: Color(0xff66758a), size: 20),
-    ),
-  );
-}
-
 class ActionButton extends StatelessWidget {
   const ActionButton({super.key, required this.label, required this.onPressed});
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) => SizedBox(

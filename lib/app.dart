@@ -6,7 +6,16 @@ import 'screens/auth_screen.dart';
 import 'widgets/brand_mark.dart';
 
 class ItlabcareApp extends StatelessWidget {
-  const ItlabcareApp({super.key});
+  const ItlabcareApp({
+    super.key,
+    this.signIn,
+    this.passwordReset,
+    this.emailLookup,
+  });
+
+  final StudentSignIn? signIn;
+  final StudentPasswordReset? passwordReset;
+  final StudentEmailLookup? emailLookup;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -23,16 +32,44 @@ class ItlabcareApp extends StatelessWidget {
       fontFamily: 'Arial',
       visualDensity: VisualDensity.standard,
       textTheme: const TextTheme(
-        headlineLarge: TextStyle(fontSize: 28, height: 1.08, fontWeight: FontWeight.w800, color: Color(0xff17243a)),
-        headlineMedium: TextStyle(fontSize: 22, height: 1.15, fontWeight: FontWeight.w800, color: Color(0xff17243a)),
-        titleLarge: TextStyle(fontSize: 18, height: 1.2, fontWeight: FontWeight.w800, color: Color(0xff17243a)),
-        titleMedium: TextStyle(fontSize: 15, height: 1.25, fontWeight: FontWeight.w700, color: Color(0xff17243a)),
-        bodyLarge: TextStyle(fontSize: 14, height: 1.4, color: Color(0xff344054)),
-        bodyMedium: TextStyle(fontSize: 14, height: 1.4, color: Color(0xff66758a)),
+        headlineLarge: TextStyle(
+          fontSize: 28,
+          height: 1.08,
+          fontWeight: FontWeight.w800,
+          color: Color(0xff17243a),
+        ),
+        headlineMedium: TextStyle(
+          fontSize: 22,
+          height: 1.15,
+          fontWeight: FontWeight.w800,
+          color: Color(0xff17243a),
+        ),
+        titleLarge: TextStyle(
+          fontSize: 18,
+          height: 1.2,
+          fontWeight: FontWeight.w800,
+          color: Color(0xff17243a),
+        ),
+        titleMedium: TextStyle(
+          fontSize: 15,
+          height: 1.25,
+          fontWeight: FontWeight.w700,
+          color: Color(0xff17243a),
+        ),
+        bodyLarge: TextStyle(
+          fontSize: 14,
+          height: 1.4,
+          color: Color(0xff344054),
+        ),
+        bodyMedium: TextStyle(
+          fontSize: 14,
+          height: 1.4,
+          color: Color(0xff66758a),
+        ),
         labelLarge: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
       ),
       appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -40,7 +77,9 @@ class ItlabcareApp extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(0, 48),
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
         ),
       ),
@@ -48,7 +87,9 @@ class ItlabcareApp extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(0, 48),
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           side: const BorderSide(color: AppColors.border),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
         ),
@@ -69,7 +110,10 @@ class ItlabcareApp extends StatelessWidget {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 15,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border),
@@ -85,12 +129,25 @@ class ItlabcareApp extends StatelessWidget {
       ),
     ),
     builder: (context, child) => child ?? const SizedBox.shrink(),
-    home: const OpeningScreen(),
+    home: OpeningScreen(
+      signIn: signIn,
+      passwordReset: passwordReset,
+      emailLookup: emailLookup,
+    ),
   );
 }
 
 class OpeningScreen extends StatefulWidget {
-  const OpeningScreen({super.key});
+  const OpeningScreen({
+    super.key,
+    this.signIn,
+    this.passwordReset,
+    this.emailLookup,
+  });
+
+  final StudentSignIn? signIn;
+  final StudentPasswordReset? passwordReset;
+  final StudentEmailLookup? emailLookup;
 
   @override
   State<OpeningScreen> createState() => _OpeningScreenState();
@@ -108,19 +165,20 @@ class _OpeningScreenState extends State<OpeningScreen>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: openingDuration,
-    );
+    _controller = AnimationController(vsync: this, duration: openingDuration);
     _startTimer = Timer(handoffDelay, _controller.forward);
     _timer = Timer(handoffDelay + const Duration(milliseconds: 2200), () {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         PageRouteBuilder<void>(
-          pageBuilder: (_, __, ___) => const AuthScreen(),
+          pageBuilder: (_, _, _) => AuthScreen(
+            signIn: widget.signIn,
+            passwordReset: widget.passwordReset,
+            emailLookup: widget.emailLookup,
+          ),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
-          transitionsBuilder: (_, __, ___, child) => child,
+          transitionsBuilder: (_, _, _, child) => child,
         ),
       );
     });
@@ -142,8 +200,11 @@ class _OpeningScreenState extends State<OpeningScreen>
         animation: _controller,
         builder: (context, child) {
           final value = Curves.easeOutBack.transform(_controller.value);
-          final textOpacity = const Interval(0.48, 1, curve: Curves.easeOut)
-              .transform(_controller.value);
+          final textOpacity = const Interval(
+            0.48,
+            1,
+            curve: Curves.easeOut,
+          ).transform(_controller.value);
           return Opacity(
             opacity: _controller.value,
             child: Column(
@@ -188,7 +249,10 @@ class _OpeningScreenState extends State<OpeningScreen>
                       SizedBox(height: 5),
                       Text(
                         'Computer Laboratory Management System',
-                        style: TextStyle(color: Color(0xff9aa7bd), fontSize: 11),
+                        style: TextStyle(
+                          color: Color(0xff9aa7bd),
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),
@@ -229,4 +293,3 @@ abstract final class AppColors {
   static const warning = Color(0xffb7791f);
   static const danger = Color(0xffc2414b);
 }
-

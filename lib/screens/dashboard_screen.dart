@@ -108,7 +108,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         SizedBox(height: isTablet ? 22 : 30),
                         const Text(
-                          'Hello, Teacher Xander!',
+                          'Hello, Student Xander!',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -353,7 +353,7 @@ class FeaturedAction extends StatelessWidget {
                   ),
                   SizedBox(height: 3),
                   Text(
-                    'Identify a lab computer and manage it',
+                    'Identify a lab computer and report an issue',
                     style: TextStyle(color: Color(0xffdbeafe), fontSize: 13),
                   ),
                 ],

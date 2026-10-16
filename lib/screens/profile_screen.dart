@@ -223,12 +223,12 @@ class ProfileCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Sir Alexander', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+              Text('Alexander John', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
               SizedBox(height: 4),
-              Text('Teacher account', style: TextStyle(color: Color(0xffdbeafe), fontSize: 13, fontWeight: FontWeight.w700)),
+              Text('Student account', style: TextStyle(color: Color(0xffdbeafe), fontSize: 13, fontWeight: FontWeight.w700)),
               SizedBox(height: 3),
-              Text('IT 2 • CITE Department', style: TextStyle(color: Color(0xffdbeafe), fontSize: 12)),
-              Text('Teacher.juan@gmail.com', style: TextStyle(color: Color(0xffdbeafe), fontSize: 12)),
+              Text('BSIT 2 • CITE Department', style: TextStyle(color: Color(0xffdbeafe), fontSize: 12)),
+              Text('alexander.aspiras@student.edu', style: TextStyle(color: Color(0xffdbeafe), fontSize: 12)),
             ],
           ),
         ),

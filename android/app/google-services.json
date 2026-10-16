@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "836848158930",
+    "project_id": "itlabcare",
+    "storage_bucket": "itlabcare.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836848158930:android:0c298d06adceddb55dc50b",
+        "android_client_info": {
+          "package_name": "com.example.itlabcare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8G9wVyv8Ca6UiCPJh2PV1T9bDfgA9tf4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

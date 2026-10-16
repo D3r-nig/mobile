@@ -92,8 +92,9 @@ class PersonalInformationView extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         const DetailField(label: 'Full Name', value: 'Alexander John Aspiras'),
-        const DetailField(label: 'Email', value: 'Sir.Xander67@gmail.com'),
-        const LabeledRoleField(),
+        const DetailField(label: 'Email', value: 'alexander.aspiras@student.edu'),
+        const DetailField(label: 'Student No.', value: '2026-0001'),
+        const DetailField(label: 'Course / Year', value: 'BSIT 2'),
         const DetailField(label: 'Department', value: 'CITE'),
         const SizedBox(height: 14),
         ActionButton(label: 'Save Changes', onPressed: _showSaved),
@@ -260,27 +261,6 @@ class DetailField extends StatelessWidget {
             ),
           ),
         ),
-      ],
-    ),
-  );
-}
-
-class LabeledRoleField extends StatelessWidget {
-  const LabeledRoleField({super.key});
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 12, bottom: 5),
-          child: Text(
-            'Role',
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
-          ),
-        ),
-        const RoleField(),
       ],
     ),
   );
