@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/auth_widgets.dart';
 import '../widgets/navigation.dart';
+import '../services/maintenance_history_service.dart';
 import '../services/report_submission_service.dart';
 import 'reports_screen.dart';
 
@@ -75,7 +76,7 @@ class ComputerDetailsScreen extends StatelessWidget {
   );
 }
 
-class MaintenanceHistoryScreen extends StatelessWidget {
+class MaintenanceHistoryScreen extends StatefulWidget {
   const MaintenanceHistoryScreen({
     super.key,
     this.computerId = 1,
@@ -85,6 +86,27 @@ class MaintenanceHistoryScreen extends StatelessWidget {
 
   final int computerId;
   final String assetTag, lab;
+
+  @override
+  State<MaintenanceHistoryScreen> createState() => _MaintenanceHistoryScreenState();
+}
+
+class _MaintenanceHistoryScreenState extends State<MaintenanceHistoryScreen> {
+  late final MaintenanceHistoryService _service = MaintenanceHistoryService();
+  late Future<List<MaintenanceRecordEntry>> _records;
+
+  @override
+  void initState() {
+    super.initState();
+    _records = _service.load(widget.computerId);
+  }
+
+  @override
+  void dispose() {
+    _service.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) => WorkflowScaffold(
     title: 'Maintenance History',
@@ -93,26 +115,52 @@ class MaintenanceHistoryScreen extends StatelessWidget {
       onPressed: () => openDissolve(
         context,
         ReportProblemScreen(
-          computerId: computerId,
-          assetTag: assetTag,
-          lab: lab,
+          computerId: widget.computerId,
+          assetTag: widget.assetTag,
+          lab: widget.lab,
         ),
       ),
     ),
     child: Column(
       children: [
-        ComputerCard(assetTag: assetTag, lab: lab),
-        const MaintenanceItem(
-          date: 'Aug 10, 2026',
-          title: 'Hardware Cleaning',
-          technician: 'Technician: Lebron James',
-          status: 'Completed',
-        ),
-        const MaintenanceItem(
-          date: 'July 03, 2026',
-          title: 'Replaced RAM',
-          technician: 'Technician: Kyrie Irving',
-          status: 'Mix Signals',
+        ComputerCard(assetTag: widget.assetTag, lab: widget.lab),
+        FutureBuilder<List<MaintenanceRecordEntry>>(
+          future: _records,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (snapshot.hasError) {
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Unable to load maintenance history. Pull back and try again.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
+            }
+            final records = snapshot.data ?? const [];
+            if (records.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.all(24),
+                child: Text('No maintenance history for this computer.'),
+              );
+            }
+            return Column(
+              children: records
+                  .map((record) => MaintenanceItem(
+                        date: record.scheduledDate,
+                        title: record.title,
+                        technician: 'Technician: ${record.technician ?? 'Unassigned'}',
+                        status: record.status,
+                      ))
+                  .toList(),
+            );
+          },
         ),
       ],
     ),
