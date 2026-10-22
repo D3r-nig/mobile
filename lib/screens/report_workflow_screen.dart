@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/auth_widgets.dart';
 import '../widgets/navigation.dart';
+import '../services/report_submission_service.dart';
 import 'reports_screen.dart';
 
 class ComputerDetailsScreen extends StatelessWidget {
@@ -81,14 +82,64 @@ class MaintenanceHistoryScreen extends StatelessWidget {
   );
 }
 
-class ReportProblemScreen extends StatelessWidget {
-  const ReportProblemScreen({super.key});
+class ReportProblemScreen extends StatefulWidget {
+  const ReportProblemScreen({super.key, this.computerId = 1, this.dataSource});
+
+  final int computerId;
+  final StudentReportSubmissionDataSource? dataSource;
+
+  @override
+  State<ReportProblemScreen> createState() => _ReportProblemScreenState();
+}
+
+class _ReportProblemScreenState extends State<ReportProblemScreen> {
+  late final StudentReportSubmissionDataSource _dataSource =
+      widget.dataSource ?? FirebaseStudentReportSubmissionDataSource();
+  final _descriptionController = TextEditingController();
+  String _category = 'hardware';
+  String _priority = 'medium';
+  bool _submitting = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    if (widget.dataSource == null && _dataSource is FirebaseStudentReportSubmissionDataSource) {
+      (_dataSource as FirebaseStudentReportSubmissionDataSource).dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final description = _descriptionController.text.trim();
+    if (description.isEmpty) {
+      setState(() => _error = 'Please describe the problem.');
+      return;
+    }
+    setState(() { _submitting = true; _error = null; });
+    try {
+      await _dataSource.submitReport(
+        computerId: widget.computerId,
+        category: _category,
+        description: description,
+        priority: _priority,
+      );
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(noAnimationRoute((_) => const ReportSubmittedScreen()));
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _error = error.toString());
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => WorkflowScaffold(
     title: 'Report a Problem',
     bottom: ActionButton(
       label: 'Report a Problem',
-      onPressed: () => openDissolve(context, const ReportSubmittedScreen()),
+      onPressed: _submitting ? null : () { _submit(); },
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,10 +151,11 @@ class ReportProblemScreen extends StatelessWidget {
           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 5),
-        const ReportOptionField(
-          initialValue: 'Hardware',
+        ReportOptionField(
+          initialValue: _category,
           options: ['Hardware', 'Software', 'Network', 'Peripheral', 'Other'],
           icon: Icons.category_outlined,
+          onChanged: (value) => setState(() => _category = value.toLowerCase()),
         ),
         const SizedBox(height: 10),
         const Text(
@@ -111,7 +163,8 @@ class ReportProblemScreen extends StatelessWidget {
           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 5),
-        const TextField(
+        TextField(
+          controller: _descriptionController,
           maxLines: 3,
           decoration: InputDecoration(
             hintText: 'Please describe the issue...',
@@ -153,11 +206,16 @@ class ReportProblemScreen extends StatelessWidget {
           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 5),
-        const ReportOptionField(
-          initialValue: 'Medium',
+        ReportOptionField(
+          initialValue: _priority,
           options: ['Low', 'Medium', 'High'],
           icon: Icons.flag_outlined,
+          onChanged: (value) => setState(() => _priority = value.toLowerCase()),
         ),
+        if (_error != null) ...[
+          const SizedBox(height: 10),
+          Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 11)),
+        ],
       ],
     ),
   );
@@ -169,23 +227,25 @@ class ReportOptionField extends StatelessWidget {
     required this.initialValue,
     required this.options,
     required this.icon,
+    required this.onChanged,
   });
 
   final String initialValue;
   final List<String> options;
   final IconData icon;
+  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) => DropdownButtonFormField<String>(
-    initialValue: initialValue,
+    initialValue: initialValue.toLowerCase(),
     items: [
       for (final option in options)
         DropdownMenuItem(
-          value: option,
+          value: option.toLowerCase(),
           child: Text(option, style: const TextStyle(fontSize: 14)),
         ),
     ],
-    onChanged: (_) {},
+    onChanged: (value) { if (value != null) onChanged(value); },
     decoration: InputDecoration(
       labelStyle: const TextStyle(color: Color(0xff66758a), fontSize: 12),
       prefixIcon: Icon(icon, color: const Color(0xff66758a), size: 20),
@@ -210,26 +270,21 @@ class ReportSubmittedScreen extends StatelessWidget {
               ),
               const SizedBox(height: 22),
               const Text(
-                'Report Submitted!',
+                'Report Sent for Review',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 7),
               const Text(
-                'Your report has been successfully\nsubmitted.',
+                'Your report was sent to your teacher\nfor validation before processing.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 10),
               ),
-              const SizedBox(height: 22),
-              const InfoRow(label: 'Report ID', value: '#1021'),
-              const InfoRow(label: 'Computer', value: 'PC - 001'),
-              const InfoRow(label: 'Submitted', value: 'Aug 17, 2028'),
-              const InfoRow(label: 'OS', value: 'Pending'),
               const SizedBox(height: 14),
               ActionButton(
                 label: 'View My Reports',
-                onPressed: () => Navigator.of(context).push(
-                  noAnimationRoute((_) => const ReportsScreen()),
-                ),
+                onPressed: () =>
+                    Navigator.of(context)
+                        .push(noAnimationRoute((_) => const ReportsScreen())),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context)
@@ -243,31 +298,6 @@ class ReportSubmittedScreen extends StatelessWidget {
           ),
         ),
       ),
-    ),
-  );
-}
-
-class ReportTrackingScreen extends StatelessWidget {
-  const ReportTrackingScreen({super.key});
-  @override
-  Widget build(BuildContext context) => WorkflowScaffold(
-    title: 'Report Details',
-    largeHeader: true,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const ReportSummaryCard(),
-        const SizedBox(height: 38),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 22),
-          child: Text(
-            'Status Timeline',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-          ),
-        ),
-        const SizedBox(height: 20),
-        const StatusTimeline(),
-      ],
     ),
   );
 }
@@ -395,7 +425,7 @@ class InfoRow extends StatelessWidget {
   final Color? valueColor;
   @override
   Widget build(BuildContext context) => Container(
-      height: 44,
+    height: 44,
     padding: const EdgeInsets.symmetric(horizontal: 10),
     decoration: const BoxDecoration(
       color: Colors.white,
@@ -410,7 +440,11 @@ class InfoRow extends StatelessWidget {
         const Spacer(),
         Text(
           value,
-          style: TextStyle(fontSize: 12, color: valueColor ?? const Color(0xff344054), fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 12,
+            color: valueColor ?? const Color(0xff344054),
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     ),
@@ -512,199 +546,5 @@ class MaintenanceItem extends StatelessWidget {
         ),
       ],
     ),
-  );
-}
-
-class ReportSummaryCard extends StatelessWidget {
-  const ReportSummaryCard({super.key});
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.fromLTRB(20, 18, 18, 18),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x18000000),
-          blurRadius: 18,
-          offset: Offset(0, 8),
-        ),
-      ],
-    ),
-    child: const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text('#1021', style: TextStyle(fontSize: 15)),
-            Spacer(),
-            _StatusBadge(),
-          ],
-        ),
-        SizedBox(height: 10),
-        Text(
-          'PC - 001',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
-        ),
-        SizedBox(height: 8),
-        const Text('No display on monitor', style: TextStyle(fontSize: 16)),
-        SizedBox(height: 18),
-        Row(
-          children: [
-            Text('Submitted', style: TextStyle(fontSize: 15)),
-            Spacer(),
-            Text('Aug 17, 2028 • 09:41 AM', style: TextStyle(fontSize: 12)),
-          ],
-        ),
-        SizedBox(height: 12),
-        Row(
-          children: [
-            Text('Priority', style: TextStyle(fontSize: 15)),
-            Spacer(),
-            Text('Medium', style: TextStyle(fontSize: 12)),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-    decoration: BoxDecoration(
-      color: const Color(0xfffff2cf),
-      borderRadius: BorderRadius.circular(6),
-    ),
-    child: const Text(
-      'Pending',
-      style: TextStyle(color: Color(0xff967100), fontSize: 13),
-    ),
-  );
-}
-
-class StatusTimeline extends StatelessWidget {
-  const StatusTimeline({super.key});
-
-  @override
-  Widget build(BuildContext context) => const Padding(
-    padding: EdgeInsets.symmetric(horizontal: 24),
-    child: Column(
-      children: [
-        _TimelineStep(
-          title: 'Submitted',
-          subtitle: 'Aug 17, 2028   09:41 AM',
-          active: true,
-          drawLine: true,
-        ),
-        _TimelineStep(
-          title: 'Assigned',
-          subtitle: 'Waiting for assignment',
-          drawLine: true,
-        ),
-        _TimelineStep(
-          title: 'In Progress',
-          subtitle: 'Waiting for update',
-          drawLine: true,
-        ),
-        _TimelineStep(title: 'Completed', subtitle: 'Waiting for completion'),
-      ],
-    ),
-  );
-}
-
-class _TimelineStep extends StatelessWidget {
-  const _TimelineStep({
-    required this.title,
-    required this.subtitle,
-    this.active = false,
-    this.drawLine = false,
-  });
-
-  final String title;
-  final String subtitle;
-  final bool active;
-  final bool drawLine;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 66,
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 58,
-          child: Stack(
-            fit: StackFit.expand,
-            alignment: Alignment.topCenter,
-            children: [
-              if (drawLine)
-                Positioned(
-                  top: 34,
-                  bottom: 0,
-                  child: Container(width: 2, color: Colors.black),
-                ),
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: active ? const Color(0xff078407) : Colors.white,
-                  shape: BoxShape.circle,
-                  border: active
-                      ? null
-                      : Border.all(color: Colors.black, width: 2),
-                ),
-                child: active
-                    ? const Icon(Icons.check, color: Colors.white, size: 22)
-                    : null,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              Text(subtitle, style: const TextStyle(fontSize: 9)),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class TimelineRow extends StatelessWidget {
-  const TimelineRow({super.key, required this.label, this.active = false});
-  final String label;
-  final bool active;
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Icon(
-        active ? Icons.check_circle : Icons.radio_button_unchecked,
-        color: active ? Colors.green : Colors.black,
-        size: 22,
-      ),
-      const SizedBox(width: 10),
-      Text(
-        label,
-        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
-      ),
-    ],
   );
 }
