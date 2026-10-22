@@ -23,10 +23,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> with WidgetsB
   bool _loading = true;
   String _filter = 'All';
 
+  List<StudentNotification> get _cachedNotifications =>
+      FirebaseNotificationsDataSource.cachedNotifications ?? const [];
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _notifications = _cachedNotifications;
+    _loading = _notifications.isEmpty;
     _loadNotifications();
     _poller = Timer.periodic(const Duration(seconds: 10), (_) => _loadNotifications());
   }

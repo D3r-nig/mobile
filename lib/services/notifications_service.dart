@@ -34,6 +34,8 @@ abstract interface class NotificationsDataSource {
 }
 
 class FirebaseNotificationsDataSource implements NotificationsDataSource {
+  static List<StudentNotification>? _cachedNotifications;
+
   FirebaseNotificationsDataSource({http.Client? client, FirebaseIdTokenProvider? tokenProvider, String? baseUrl})
       : _ownsClient = client == null,
         _client = client ?? http.Client(),
@@ -49,6 +51,10 @@ class FirebaseNotificationsDataSource implements NotificationsDataSource {
     if (_ownsClient) _client.close();
   }
 
+  static List<StudentNotification>? get cachedNotifications => _cachedNotifications;
+
+  static void clearCache() => _cachedNotifications = null;
+
   @override
   Future<List<StudentNotification>> loadNotifications() async {
     final token = await _tokenProvider.getIdToken();
@@ -60,7 +66,9 @@ class FirebaseNotificationsDataSource implements NotificationsDataSource {
     if (response.statusCode < 200 || response.statusCode >= 300) throw NotificationsApiException(response.statusCode);
     final payload = jsonDecode(response.body);
     if (payload is! List) throw const FormatException('Invalid notifications response.');
-    return payload.map(StudentNotification.fromJson).toList();
+    final notifications = payload.map(StudentNotification.fromJson).toList();
+    _cachedNotifications = notifications;
+    return notifications;
   }
 }
 
