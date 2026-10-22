@@ -6,7 +6,9 @@ import '../services/report_submission_service.dart';
 import 'reports_screen.dart';
 
 class ComputerDetailsScreen extends StatelessWidget {
-  const ComputerDetailsScreen({super.key});
+  const ComputerDetailsScreen({super.key, this.computerId = 1});
+
+  final int computerId;
   @override
   Widget build(BuildContext context) => WorkflowScaffold(
     title: 'Computer Details',
@@ -37,7 +39,7 @@ class ComputerDetailsScreen extends StatelessWidget {
           textColor: const Color(0xffec6464),
           icon: Icons.warning_amber_outlined,
           onTap: (context) =>
-              openDissolve(context, const ReportProblemScreen()),
+              openDissolve(context, ReportProblemScreen(computerId: computerId)),
         ),
         const SizedBox(height: 8),
         WorkflowButton(
@@ -46,7 +48,7 @@ class ComputerDetailsScreen extends StatelessWidget {
           textColor: const Color(0xff6685e9),
           icon: Icons.history,
           onTap: (context) =>
-              openDissolve(context, const MaintenanceHistoryScreen()),
+              openDissolve(context, MaintenanceHistoryScreen(computerId: computerId)),
         ),
       ],
     ),
@@ -54,13 +56,18 @@ class ComputerDetailsScreen extends StatelessWidget {
 }
 
 class MaintenanceHistoryScreen extends StatelessWidget {
-  const MaintenanceHistoryScreen({super.key});
+  const MaintenanceHistoryScreen({super.key, this.computerId = 1});
+
+  final int computerId;
   @override
   Widget build(BuildContext context) => WorkflowScaffold(
     title: 'Maintenance History',
     bottom: ActionButton(
       label: 'Report a Problem',
-      onPressed: () => openDissolve(context, const ReportProblemScreen()),
+      onPressed: () => openDissolve(
+        context,
+        ReportProblemScreen(computerId: computerId),
+      ),
     ),
     child: Column(
       children: [

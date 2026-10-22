@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../services/qr_computer_service.dart';
 import '../widgets/app_nav_bar.dart';
 import '../widgets/navigation.dart';
 import 'report_workflow_screen.dart';
@@ -50,7 +52,7 @@ class ScanScreen extends StatelessWidget {
                                       child: InkWell(
                                         onTap: () => openDissolve(
                                           context,
-                                          const ScanResultScreen(),
+                                          const QrScannerScreen(),
                                         ),
                                         child: const Padding(
                                           padding: EdgeInsets.all(24),
@@ -192,6 +194,93 @@ class ScanResultScreen extends StatefulWidget {
 
   @override
   State<ScanResultScreen> createState() => _ScanResultScreenState();
+}
+
+class QrScannerScreen extends StatefulWidget {
+  const QrScannerScreen({super.key});
+
+  @override
+  State<QrScannerScreen> createState() => _QrScannerScreenState();
+}
+
+class _QrScannerScreenState extends State<QrScannerScreen> {
+  final _controller = MobileScannerController(
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
+  final _computerService = QrComputerService();
+  bool _resolving = false;
+
+  Future<void> _handleCode(BarcodeCapture capture) async {
+    if (_resolving) return;
+    final token = capture.barcodes
+        .map((barcode) => barcode.rawValue)
+        .whereType<String>()
+        .map((value) => value.trim())
+        .firstWhere((value) => value.isNotEmpty, orElse: () => '');
+    if (token.isEmpty) return;
+
+    setState(() => _resolving = true);
+    await _controller.stop();
+    try {
+      final computer = await _computerService.resolve(token);
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        noAnimationRoute((_) => ComputerDetailsScreen(computerId: computer.id)),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _resolving = false);
+      await _controller.start();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString().replaceFirst('Exception: ', ''))),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _computerService.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: const Color(0xff1d2a3a),
+    appBar: AppBar(
+      title: const Text('Scan QR Code'),
+      backgroundColor: const Color(0xff155bb2),
+      foregroundColor: Colors.white,
+    ),
+    body: Stack(
+      fit: StackFit.expand,
+      children: [
+        MobileScanner(controller: _controller, onDetect: _handleCode),
+        Center(
+          child: Container(
+            width: 260,
+            height: 260,
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xff1d6ef2), width: 4),
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+        if (_resolving)
+          const Center(child: CircularProgressIndicator(color: Colors.white)),
+        const Positioned(
+          bottom: 32,
+          left: 0,
+          right: 0,
+          child: Text(
+            'Place the computer QR code inside the frame',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ScanResultScreenState extends State<ScanResultScreen> {
