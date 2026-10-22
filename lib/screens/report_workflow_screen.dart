@@ -445,7 +445,7 @@ class ComputerCard extends StatelessWidget {
         ),
       ],
     ),
-    child: const Row(
+    child: Row(
       children: [
         Icon(Icons.desktop_windows, size: 35),
         SizedBox(width: 10),
