@@ -6,11 +6,27 @@ import 'package:http/http.dart' as http;
 import 'mobile_api_config.dart';
 
 class QrComputer {
-  const QrComputer({required this.id, required this.assetTag, this.lab});
+  const QrComputer({
+    required this.id,
+    required this.assetTag,
+    this.lab,
+    this.status,
+    this.brand,
+    this.processor,
+    this.ram,
+    this.storage,
+    this.operatingSystem,
+  });
 
   final int id;
   final String assetTag;
   final String? lab;
+  final String? status;
+  final String? brand;
+  final String? processor;
+  final String? ram;
+  final String? storage;
+  final String? operatingSystem;
 }
 
 class QrComputerService {
@@ -37,6 +53,12 @@ class QrComputerService {
       id: (body['id'] as num).toInt(),
       assetTag: body['asset_tag']?.toString() ?? 'Unknown computer',
       lab: body['lab']?.toString(),
+      status: body['status']?.toString(),
+      brand: body['brand']?.toString(),
+      processor: body['processor']?.toString(),
+      ram: body['ram']?.toString(),
+      storage: body['storage']?.toString(),
+      operatingSystem: body['operating_system']?.toString(),
     );
   }
 

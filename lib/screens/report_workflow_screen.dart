@@ -6,27 +6,39 @@ import '../services/report_submission_service.dart';
 import 'reports_screen.dart';
 
 class ComputerDetailsScreen extends StatelessWidget {
-  const ComputerDetailsScreen({super.key, this.computerId = 1});
+  const ComputerDetailsScreen({
+    super.key,
+    this.computerId = 1,
+    this.assetTag = 'PC-001',
+    this.lab = 'RW 306',
+    this.status = 'Working',
+    this.brand = 'Dell OptiPlex',
+    this.processor = 'Intel Core i5',
+    this.ram = '50GB',
+    this.storage = '256 GB SSD',
+    this.operatingSystem = 'Windows 11',
+  });
 
   final int computerId;
+  final String assetTag, lab, status, brand, processor, ram, storage, operatingSystem;
   @override
   Widget build(BuildContext context) => WorkflowScaffold(
     title: 'Computer Details',
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const ComputerCard(),
+        ComputerCard(assetTag: assetTag, lab: lab),
         const SizedBox(height: 8),
-        const InfoRow(
+        InfoRow(
           label: 'Status',
-          value: 'Working',
+          value: status,
           valueColor: Color(0xff39a34a),
         ),
-        const InfoRow(label: 'Brand', value: 'Dell OptiPlex'),
-        const InfoRow(label: 'Processor', value: 'Intel Core i5'),
-        const InfoRow(label: 'RAM', value: '50GB'),
-        const InfoRow(label: 'Storage', value: '256 GB SSD'),
-        const InfoRow(label: 'OS', value: 'Windows 11'),
+        InfoRow(label: 'Brand', value: brand),
+        InfoRow(label: 'Processor', value: processor),
+        InfoRow(label: 'RAM', value: ram),
+        InfoRow(label: 'Storage', value: storage),
+        InfoRow(label: 'OS', value: operatingSystem),
         const SizedBox(height: 18),
         const Text(
           'Quick Actions',
@@ -39,7 +51,11 @@ class ComputerDetailsScreen extends StatelessWidget {
           textColor: const Color(0xffec6464),
           icon: Icons.warning_amber_outlined,
           onTap: (context) =>
-              openDissolve(context, ReportProblemScreen(computerId: computerId)),
+              openDissolve(context, ReportProblemScreen(
+                computerId: computerId,
+                assetTag: assetTag,
+                lab: lab,
+              )),
         ),
         const SizedBox(height: 8),
         WorkflowButton(
@@ -48,7 +64,11 @@ class ComputerDetailsScreen extends StatelessWidget {
           textColor: const Color(0xff6685e9),
           icon: Icons.history,
           onTap: (context) =>
-              openDissolve(context, MaintenanceHistoryScreen(computerId: computerId)),
+              openDissolve(context, MaintenanceHistoryScreen(
+                computerId: computerId,
+                assetTag: assetTag,
+                lab: lab,
+              )),
         ),
       ],
     ),
@@ -56,9 +76,15 @@ class ComputerDetailsScreen extends StatelessWidget {
 }
 
 class MaintenanceHistoryScreen extends StatelessWidget {
-  const MaintenanceHistoryScreen({super.key, this.computerId = 1});
+  const MaintenanceHistoryScreen({
+    super.key,
+    this.computerId = 1,
+    this.assetTag = 'PC-001',
+    this.lab = 'RW 306',
+  });
 
   final int computerId;
+  final String assetTag, lab;
   @override
   Widget build(BuildContext context) => WorkflowScaffold(
     title: 'Maintenance History',
@@ -66,12 +92,16 @@ class MaintenanceHistoryScreen extends StatelessWidget {
       label: 'Report a Problem',
       onPressed: () => openDissolve(
         context,
-        ReportProblemScreen(computerId: computerId),
+        ReportProblemScreen(
+          computerId: computerId,
+          assetTag: assetTag,
+          lab: lab,
+        ),
       ),
     ),
     child: Column(
       children: [
-        const ComputerCard(),
+        ComputerCard(assetTag: assetTag, lab: lab),
         const MaintenanceItem(
           date: 'Aug 10, 2026',
           title: 'Hardware Cleaning',
@@ -90,9 +120,16 @@ class MaintenanceHistoryScreen extends StatelessWidget {
 }
 
 class ReportProblemScreen extends StatefulWidget {
-  const ReportProblemScreen({super.key, this.computerId = 1, this.dataSource});
+  const ReportProblemScreen({
+    super.key,
+    this.computerId = 1,
+    this.assetTag = 'PC-001',
+    this.lab = 'RW 306',
+    this.dataSource,
+  });
 
   final int computerId;
+  final String assetTag, lab;
   final StudentReportSubmissionDataSource? dataSource;
 
   @override
@@ -151,7 +188,7 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const ComputerCard(),
+        ComputerCard(assetTag: widget.assetTag, lab: widget.lab),
         const SizedBox(height: 10),
         const Text(
           'Problem Category',
@@ -387,7 +424,13 @@ class WorkflowScaffold extends StatelessWidget {
 }
 
 class ComputerCard extends StatelessWidget {
-  const ComputerCard({super.key});
+  const ComputerCard({
+    super.key,
+    this.assetTag = 'PC-001',
+    this.lab = 'RW 306',
+  });
+
+  final String assetTag, lab;
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(10),
@@ -410,10 +453,10 @@ class ComputerCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'PC - 001',
+              assetTag,
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
             ),
-            Text('RW 306', style: TextStyle(fontSize: 9)),
+            Text(lab, style: TextStyle(fontSize: 9)),
           ],
         ),
       ],

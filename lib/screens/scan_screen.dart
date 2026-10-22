@@ -12,181 +12,7 @@ class ScanScreen extends StatelessWidget {
   const ScanScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            const ScreenHeader(title: 'Scan QR Code'),
-            Expanded(
-              child: Container(
-                color: const Color(0xff1d2a3a),
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 300),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 12),
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final frameSize = constraints.maxWidth < 260
-                                  ? constraints.maxWidth
-                                  : 260.0;
-                              return SizedBox(
-                                width: frameSize,
-                                height: frameSize,
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    DecoratedBox(
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(8),
-                                        ),
-                                      ),
-                                      child: InkWell(
-                                        onTap: () => openDissolve(
-                                          context,
-                                          const QrScannerScreen(),
-                                        ),
-                                        child: const Padding(
-                                          padding: EdgeInsets.all(24),
-                                          child: Icon(
-                                            Icons.qr_code_2,
-                                            size: 150,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      left: 0,
-                                      top: 0,
-                                      child: Container(
-                                        width: 48,
-                                        height: 48,
-                                        decoration: const BoxDecoration(
-                                          border: Border(
-                                            left: BorderSide(
-                                              color: Color(0xff1d6ef2),
-                                              width: 5,
-                                            ),
-                                            top: BorderSide(
-                                              color: Color(0xff1d6ef2),
-                                              width: 5,
-                                            ),
-                                          ),
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(12),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      right: 0,
-                                      top: 0,
-                                      child: Container(
-                                        width: 48,
-                                        height: 48,
-                                        decoration: const BoxDecoration(
-                                          border: Border(
-                                            right: BorderSide(
-                                              color: Color(0xff1d6ef2),
-                                              width: 5,
-                                            ),
-                                            top: BorderSide(
-                                              color: Color(0xff1d6ef2),
-                                              width: 5,
-                                            ),
-                                          ),
-                                          borderRadius: BorderRadius.only(
-                                            topRight: Radius.circular(12),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      left: 0,
-                                      bottom: 0,
-                                      child: Container(
-                                        width: 48,
-                                        height: 48,
-                                        decoration: const BoxDecoration(
-                                          border: Border(
-                                            left: BorderSide(
-                                              color: Color(0xff1d6ef2),
-                                              width: 5,
-                                            ),
-                                            bottom: BorderSide(
-                                              color: Color(0xff1d6ef2),
-                                              width: 5,
-                                            ),
-                                          ),
-                                          borderRadius: BorderRadius.only(
-                                            bottomLeft: Radius.circular(12),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      right: 0,
-                                      bottom: 0,
-                                      child: Container(
-                                        width: 48,
-                                        height: 48,
-                                        decoration: const BoxDecoration(
-                                          border: Border(
-                                            right: BorderSide(
-                                              color: Color(0xff1d6ef2),
-                                              width: 5,
-                                            ),
-                                            bottom: BorderSide(
-                                              color: Color(0xff1d6ef2),
-                                              width: 5,
-                                            ),
-                                          ),
-                                          borderRadius: BorderRadius.only(
-                                            bottomRight: Radius.circular(12),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 18),
-                          const Text(
-                            'Position the QR code inside\nthe frame to scan',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            AppNavBar(
-              selected: 2,
-              onSelected: (index) => navigateFrom(context, index, 2),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const QrScannerScreen();
 }
 
 class ScanResultScreen extends StatefulWidget {
@@ -225,7 +51,17 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       final computer = await _computerService.resolve(token);
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        noAnimationRoute((_) => ComputerDetailsScreen(computerId: computer.id)),
+        noAnimationRoute((_) => ComputerDetailsScreen(
+          computerId: computer.id,
+          assetTag: computer.assetTag,
+          lab: computer.lab ?? 'Unknown laboratory',
+          status: computer.status ?? 'Unknown',
+          brand: computer.brand ?? 'Unknown',
+          processor: computer.processor ?? 'Unknown',
+          ram: computer.ram ?? 'Unknown',
+          storage: computer.storage ?? 'Unknown',
+          operatingSystem: computer.operatingSystem ?? 'Unknown',
+        )),
       );
     } catch (error) {
       if (!mounted) return;
