@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../services/reports_service.dart';
@@ -21,11 +23,19 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Object? _loadError;
   bool _isLoading = true;
   String _selectedFilter = 'All';
+  Timer? _syncTimer;
 
   @override
   void initState() {
     super.initState();
+    if (_dataSource is FirebaseStudentReportsDataSource) {
+      _reports = FirebaseStudentReportsDataSource.cachedReports;
+      _isLoading = _reports == null;
+    }
     _loadReports();
+    _syncTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) _loadReports(silent: true);
+    });
   }
 
   @override
@@ -34,26 +44,31 @@ class _ReportsScreenState extends State<ReportsScreen> {
         _dataSource is FirebaseStudentReportsDataSource) {
       _dataSource.dispose();
     }
+    _syncTimer?.cancel();
     super.dispose();
   }
 
-  Future<void> _loadReports() async {
-    setState(() {
-      _loadError = null;
-      _isLoading = _reports == null;
-    });
+  Future<void> _loadReports({bool silent = false}) async {
+    if (!mounted) return;
+    if (!silent) {
+      setState(() {
+        _loadError = null;
+        _isLoading = _reports == null;
+      });
+    }
     try {
       final reports = await _dataSource.loadReports();
       if (!mounted) return;
       setState(() {
         _reports = reports;
         _isLoading = false;
+        _loadError = null;
       });
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _loadError = error;
-        _isLoading = false;
+        _isLoading = _reports == null;
       });
     }
   }

@@ -161,6 +161,8 @@ class ReportsConfigurationException implements Exception {
 }
 
 class FirebaseStudentReportsDataSource implements StudentReportsDataSource {
+  static List<StudentReport>? _cachedReports;
+
   FirebaseStudentReportsDataSource({
     http.Client? client,
     FirebaseIdTokenProvider? tokenProvider,
@@ -182,10 +184,16 @@ class FirebaseStudentReportsDataSource implements StudentReportsDataSource {
     if (_ownsClient) _client.close();
   }
 
+  static List<StudentReport>? get cachedReports => _cachedReports;
+
+  static void clearCache() => _cachedReports = null;
+
   @override
   Future<List<StudentReport>> loadReports() async {
     final payload = await _request('/mobile/problem-reports', isDetail: false);
-    return _reportList(payload).map(StudentReport.fromJson).toList();
+    final reports = _reportList(payload).map(StudentReport.fromJson).toList();
+    _cachedReports = reports;
+    return reports;
   }
 
   @override
