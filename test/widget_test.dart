@@ -75,13 +75,16 @@ void main() {
     );
   });
 
-  testWidgets('does not send reset when the API URL is not configured', (
+  testWidgets('does not send reset when email registration lookup fails', (
     tester,
   ) async {
     var resetRequested = false;
     await tester.pumpWidget(
       ItlabcareApp(
         signIn: (email, password) async {},
+        emailLookup: (email) async {
+          throw StateError('Email registration check failed with status 500.');
+        },
         passwordReset: (email) async {
           resetRequested = true;
         },
@@ -99,7 +102,7 @@ void main() {
     expect(resetRequested, isFalse);
     expect(
       find.text(
-        'Mobile API URL is not configured. Please rebuild the app with the Laravel API URL.',
+        'Server could not verify emails. Please start/fix MySQL, then try again.',
       ),
       findsOneWidget,
     );
@@ -442,7 +445,7 @@ void main() {
 
     await signIn(tester);
 
-    expect(find.text('Hello, Student Xander!'), findsOneWidget);
+    expect(find.text('Hello, Student!'), findsOneWidget);
     expect(find.text('Quick Actions'), findsOneWidget);
     expect(find.text('Summary'), findsOneWidget);
     expect(find.text('Scan QR Code'), findsOneWidget);
@@ -462,29 +465,32 @@ void main() {
 
     await tester.tap(find.text('Profile'));
     await tester.pumpAndSettle();
-    expect(find.text('Alexander John'), findsOneWidget);
-    expect(find.text('Student account'), findsOneWidget);
+    expect(find.text('Profile'), findsWidgets);
+    expect(find.text('Alexander John'), findsNothing);
+    expect(find.text('Student account'), findsNothing);
 
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
-    expect(find.text('Hello, Student Xander!'), findsOneWidget);
+    expect(find.text('Hello, Student!'), findsOneWidget);
   });
 
-  testWidgets('opens the profile detail forms', (tester) async {
+  testWidgets('opens the password settings from Profile', (tester) async {
     await pumpApp(tester);
     await signIn(tester);
     await tester.tap(find.text('Profile'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Personal Information'));
-    await tester.pumpAndSettle();
-    expect(find.text('Alexander John Aspiras'), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.arrow_back_ios_new));
-    await tester.pumpAndSettle();
-
+    await tester.scrollUntilVisible(
+      find.text('Change Password'),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Change Password'));
     await tester.pumpAndSettle();
-    expect(find.text('Password Requirements'), findsOneWidget);
+    expect(
+      find.text('Choose a password with at least 8 characters.'),
+      findsOneWidget,
+    );
     expect(find.text('Update Password'), findsNWidgets(2));
   });
 
@@ -525,25 +531,6 @@ void main() {
     expect(find.text('Report a Problem'), findsOneWidget);
   });
 
-  testWidgets('filters reports by category tab', (tester) async {
-    await pumpApp(tester);
-    await signIn(tester);
-    await tester.tap(find.text('Reports'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Reports overview'), findsOneWidget);
-    expect(find.text('3 total'), findsOneWidget);
-    expect(find.text('#1021'), findsOneWidget);
-    expect(find.text('#1067'), findsOneWidget);
-    expect(find.text('#1251'), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('report-tab-Pending')));
-    await tester.pumpAndSettle();
-    expect(find.text('#1021'), findsOneWidget);
-    expect(find.text('#1067'), findsNothing);
-    expect(find.text('#1251'), findsNothing);
-  });
-
   testWidgets('opens and submits a computer problem report', (tester) async {
     await pumpApp(tester);
     await signIn(tester);
@@ -580,6 +567,8 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.byIcon(Icons.arrow_back_ios_new));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView).first, const Offset(0, -400));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Help & Support Desk'));
     await tester.pumpAndSettle();

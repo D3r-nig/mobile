@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 import 'mobile_api_config.dart';
+import 'memory_cache.dart';
 
 class QrComputer {
   const QrComputer({
@@ -34,22 +35,39 @@ class QrComputerService {
 
   final http.Client _client;
 
-  Future<QrComputer> resolve(String token) async {
+  Future<QrComputer> resolve(String token, {bool forceRefresh = false}) async {
+    final key = 'qr:${token.trim()}';
+    if (!forceRefresh) {
+      final cached = MemoryCache.read<QrComputer>(
+        key,
+        const Duration(minutes: 5),
+      );
+      if (cached != null) return cached;
+    }
     final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
-    if (idToken == null) throw Exception('Please sign in again before scanning.');
+    if (idToken == null) {
+      throw Exception('Please sign in again before scanning.');
+    }
 
     final response = await _client.get(
-      Uri.parse('$mobileApiBaseUrl/mobile/computers/qr/${Uri.encodeComponent(token)}'),
-      headers: {'Authorization': 'Bearer $idToken', 'Accept': 'application/json'},
+      Uri.parse(
+        '$mobileApiBaseUrl/mobile/computers/qr/${Uri.encodeComponent(token)}',
+      ),
+      headers: {
+        'Authorization': 'Bearer $idToken',
+        'Accept': 'application/json',
+      },
     );
     final body = jsonDecode(response.body);
     if (response.statusCode != 200 || body is! Map<String, dynamic>) {
-      throw Exception(body is Map && body['message'] != null
-          ? body['message'].toString()
-          : 'Unable to identify this computer.');
+      throw Exception(
+        body is Map && body['message'] != null
+            ? body['message'].toString()
+            : 'Unable to identify this computer.',
+      );
     }
 
-    return QrComputer(
+    final computer = QrComputer(
       id: (body['id'] as num).toInt(),
       assetTag: body['asset_tag']?.toString() ?? 'Unknown computer',
       lab: body['lab']?.toString(),
@@ -60,6 +78,8 @@ class QrComputerService {
       storage: body['storage']?.toString(),
       operatingSystem: body['operating_system']?.toString(),
     );
+    MemoryCache.write(key, computer);
+    return computer;
   }
 
   void dispose() => _client.close();

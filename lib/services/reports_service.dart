@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import 'dashboard_service.dart';
 import 'mobile_api_config.dart';
+import 'memory_cache.dart';
 
 @immutable
 class StudentReport {
@@ -145,7 +146,7 @@ String? _stringValue(Object? value) {
 }
 
 abstract interface class StudentReportsDataSource {
-  Future<List<StudentReport>> loadReports();
+  Future<List<StudentReport>> loadReports({bool forceRefresh = false});
   Future<StudentReport> loadReport(String reportId);
 }
 
@@ -170,6 +171,7 @@ class FirebaseStudentReportsDataSource implements StudentReportsDataSource {
   }) : _ownsClient = client == null,
        _client = client ?? http.Client(),
        _tokenProvider = tokenProvider ?? CurrentFirebaseIdTokenProvider(),
+       _cacheEnabled = baseUrl == null,
        _baseUrl = (baseUrl ?? mobileApiBaseUrl).trim().replaceFirst(
          RegExp(r'/+$'),
          '',
@@ -178,6 +180,7 @@ class FirebaseStudentReportsDataSource implements StudentReportsDataSource {
   final bool _ownsClient;
   final http.Client _client;
   final FirebaseIdTokenProvider _tokenProvider;
+  final bool _cacheEnabled;
   final String _baseUrl;
 
   void dispose() {
@@ -186,13 +189,27 @@ class FirebaseStudentReportsDataSource implements StudentReportsDataSource {
 
   static List<StudentReport>? get cachedReports => _cachedReports;
 
-  static void clearCache() => _cachedReports = null;
+  static void clearCache() {
+    _cachedReports = null;
+    MemoryCache.remove('reports');
+  }
 
   @override
-  Future<List<StudentReport>> loadReports() async {
+  Future<List<StudentReport>> loadReports({bool forceRefresh = false}) async {
+    if (_cacheEnabled && !forceRefresh) {
+      final cached = MemoryCache.read<List<StudentReport>>(
+        'reports',
+        const Duration(minutes: 2),
+      );
+      if (cached != null) {
+        _cachedReports = cached;
+        return cached;
+      }
+    }
     final payload = await _request('/mobile/problem-reports', isDetail: false);
     final reports = _reportList(payload).map(StudentReport.fromJson).toList();
     _cachedReports = reports;
+    if (_cacheEnabled) MemoryCache.write('reports', reports);
     return reports;
   }
 
@@ -201,6 +218,20 @@ class FirebaseStudentReportsDataSource implements StudentReportsDataSource {
     if (reportId.trim().isEmpty) {
       throw const FormatException('The report identifier is missing.');
     }
+    final cached = _cacheEnabled
+        ? MemoryCache.read<List<StudentReport>>(
+            'reports',
+            const Duration(minutes: 2),
+          )
+        : null;
+    StudentReport? cachedReport;
+    for (final report in cached ?? const <StudentReport>[]) {
+      if (report.id == reportId) {
+        cachedReport = report;
+        break;
+      }
+    }
+    if (cachedReport != null) return cachedReport;
     final payload = await _request(
       '/mobile/problem-reports/${Uri.encodeComponent(reportId)}',
       isDetail: true,

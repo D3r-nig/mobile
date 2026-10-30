@@ -1,8 +1,10 @@
 import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 import 'mobile_api_config.dart';
+import 'memory_cache.dart';
 
 class MaintenanceRecordEntry {
   const MaintenanceRecordEntry({
@@ -14,14 +16,18 @@ class MaintenanceRecordEntry {
   });
 
   factory MaintenanceRecordEntry.fromJson(Object? value) {
-    if (value is! Map) throw const FormatException('Invalid maintenance record.');
+    if (value is! Map) {
+      throw const FormatException('Invalid maintenance record.');
+    }
     final technician = value['technician'];
     return MaintenanceRecordEntry(
       title: value['title']?.toString() ?? 'Maintenance',
       maintenanceType: value['maintenance_type']?.toString() ?? 'maintenance',
       status: value['status']?.toString() ?? 'scheduled',
       scheduledDate: value['scheduled_date']?.toString() ?? '',
-      technician: technician is Map ? technician['full_name']?.toString() : null,
+      technician: technician is Map
+          ? technician['full_name']?.toString()
+          : null,
     );
   }
 
@@ -31,25 +37,44 @@ class MaintenanceRecordEntry {
 
 class MaintenanceHistoryService {
   MaintenanceHistoryService({http.Client? client})
-      : _ownsClient = client == null,
-        _client = client ?? http.Client();
+    : _ownsClient = client == null,
+      _client = client ?? http.Client();
 
   final bool _ownsClient;
   final http.Client _client;
 
-  Future<List<MaintenanceRecordEntry>> load(int computerId) async {
+  Future<List<MaintenanceRecordEntry>> load(
+    int computerId, {
+    bool forceRefresh = false,
+  }) async {
+    final key = 'maintenance:$computerId';
+    if (!forceRefresh) {
+      final cached = MemoryCache.read<List<MaintenanceRecordEntry>>(
+        key,
+        const Duration(minutes: 5),
+      );
+      if (cached != null) return cached;
+    }
     final token = await FirebaseAuth.instance.currentUser?.getIdToken();
-    if (token == null || token.isEmpty) throw const FormatException('Please sign in again.');
+    if (token == null || token.isEmpty) {
+      throw const FormatException('Please sign in again.');
+    }
     final response = await _client.get(
-      Uri.parse('$mobileApiBaseUrl/mobile/computers/$computerId/maintenance-history'),
+      Uri.parse(
+        '$mobileApiBaseUrl/mobile/computers/$computerId/maintenance-history',
+      ),
       headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
     );
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('Unable to load maintenance history.');
     }
     final payload = jsonDecode(response.body);
-    if (payload is! List) throw const FormatException('Invalid maintenance response.');
-    return payload.map(MaintenanceRecordEntry.fromJson).toList();
+    if (payload is! List) {
+      throw const FormatException('Invalid maintenance response.');
+    }
+    final records = payload.map(MaintenanceRecordEntry.fromJson).toList();
+    MemoryCache.write(key, records);
+    return records;
   }
 
   void dispose() {

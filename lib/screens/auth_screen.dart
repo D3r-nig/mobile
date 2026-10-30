@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/auth_widgets.dart';
 import '../widgets/navigation.dart';
 import '../widgets/brand_mark.dart';
+import '../services/mobile_api_config.dart';
 import 'dashboard_screen.dart';
 
 enum AuthView { login, resetPassword, resetSent }
@@ -42,7 +43,7 @@ class _AuthScreenState extends State<AuthScreen> {
   int _activeResetRequestId = 0;
   static const navy = Color(0xff11112a);
   static const action = Color(0xff155bb2);
-  static const apiBaseUrl = String.fromEnvironment('ITLABCARE_API_BASE_URL');
+  static const apiBaseUrl = mobileApiBaseUrl;
 
   @override
   void initState() {
@@ -100,6 +101,9 @@ class _AuthScreenState extends State<AuthScreen> {
             );
           };
       await signIn(email, password);
+      if (widget.signIn == null) {
+        await FirebaseAuth.instance.currentUser?.getIdToken(true);
+      }
       if (!mounted) return;
       Navigator.of(context).push(
         noAnimationRoute(

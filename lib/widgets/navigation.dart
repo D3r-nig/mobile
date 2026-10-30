@@ -7,11 +7,12 @@ import '../screens/scan_screen.dart';
 
 void navigateFrom(BuildContext context, int index, int selected) {
   if (index == selected) return;
-  if (index == 0) {
-    Navigator.of(context)
-        .popUntil((route) => route.settings.name == '/dashboard');
-    return;
-  }
+
+  final navigator = Navigator.of(context);
+  navigator.popUntil(
+    (route) => route.settings.name == '/dashboard' || route.isFirst,
+  );
+  if (index == 0) return;
 
   final page = switch (index) {
     1 => const ReportsScreen(),
@@ -21,18 +22,20 @@ void navigateFrom(BuildContext context, int index, int selected) {
     _ => null,
   };
   if (page != null) {
-    Navigator.of(context).push(noAnimationRoute((_) => page));
+    navigator.push(noAnimationRoute((_) => page));
   }
 }
 
-PageRoute<T> noAnimationRoute<T>(WidgetBuilder builder, {RouteSettings? settings}) =>
-    PageRouteBuilder<T>(
-      settings: settings,
-      pageBuilder: (context, _, __) => builder(context),
-      transitionDuration: Duration.zero,
-      reverseTransitionDuration: Duration.zero,
-      transitionsBuilder: (_, __, ___, child) => child,
-    );
+PageRoute<T> noAnimationRoute<T>(
+  WidgetBuilder builder, {
+  RouteSettings? settings,
+}) => PageRouteBuilder<T>(
+  settings: settings,
+  pageBuilder: (context, _, _) => builder(context),
+  transitionDuration: Duration.zero,
+  reverseTransitionDuration: Duration.zero,
+  transitionsBuilder: (_, _, _, child) => child,
+);
 
 void openDissolve(BuildContext context, Widget page) {
   Navigator.of(context).push(noAnimationRoute((_) => page));

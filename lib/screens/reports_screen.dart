@@ -34,7 +34,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     }
     _loadReports();
     _syncTimer = Timer.periodic(const Duration(seconds: 15), (_) {
-      if (mounted) _loadReports(silent: true);
+      if (mounted) _loadReports(silent: true, forceRefresh: true);
     });
   }
 
@@ -48,7 +48,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
     super.dispose();
   }
 
-  Future<void> _loadReports({bool silent = false}) async {
+  Future<void> _loadReports({
+    bool silent = false,
+    bool forceRefresh = false,
+  }) async {
     if (!mounted) return;
     if (!silent) {
       setState(() {
@@ -57,7 +60,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       });
     }
     try {
-      final reports = await _dataSource.loadReports();
+      final reports = await _dataSource.loadReports(forceRefresh: forceRefresh);
       if (!mounted) return;
       setState(() {
         _reports = reports;
@@ -85,7 +88,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             const _ReportsHeader(),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: _loadReports,
+                onRefresh: () => _loadReports(forceRefresh: true),
                 child: ListView(
                   key: const Key('reports-list'),
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -143,7 +146,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   bool _matchesSelectedFilter(StudentReport report) =>
       switch (_selectedFilter) {
-        'Pending' => report.status == 'pending' || report.status == 'pending_teacher_review',
+        'Pending' =>
+          report.status == 'pending' ||
+              report.status == 'pending_teacher_review',
         'In Progress' =>
           report.status == 'assigned' || report.status == 'in_progress',
         'Completed' => report.status == 'completed',
@@ -243,7 +248,11 @@ class ReportOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pending = reports
-        .where((report) => report.status == 'pending' || report.status == 'pending_teacher_review')
+        .where(
+          (report) =>
+              report.status == 'pending' ||
+              report.status == 'pending_teacher_review',
+        )
         .length;
     final active = reports
         .where(
