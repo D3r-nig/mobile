@@ -393,22 +393,110 @@ class NotificationDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Notification Details')),
-    body: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 8),
-          Text(time, style: const TextStyle(color: Colors.grey)),
-          const SizedBox(height: 20),
-          Text(body, style: const TextStyle(fontSize: 16, height: 1.4)),
-        ],
+    backgroundColor: const Color(0xfff5f8fc),
+    appBar: AppBar(
+      title: const Text(
+        'Notification Details',
+        style: TextStyle(fontWeight: FontWeight.w800),
       ),
+      centerTitle: true,
+      backgroundColor: const Color(0xff155bb2),
+      foregroundColor: Colors.white,
+      elevation: 0,
+    ),
+    body: ListView(
+      padding: const EdgeInsets.fromLTRB(18, 24, 18, 32),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x14155bb2),
+                blurRadius: 18,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: const Color(0xffe4efff),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      Icons.notifications_active_outlined,
+                      color: Color(0xff155bb2),
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        color: Color(0xff17243a),
+                        fontSize: 22,
+                        height: 1.15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 11,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xfff0f5fa),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.schedule_outlined,
+                      size: 16,
+                      color: Color(0xff60738c),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      time,
+                      style: const TextStyle(
+                        color: Color(0xff60738c),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 22),
+              const Divider(height: 1, color: Color(0xffe7edf4)),
+              const SizedBox(height: 20),
+              Text(
+                body,
+                style: const TextStyle(
+                  color: Color(0xff52657f),
+                  fontSize: 17,
+                  height: 1.55,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     ),
   );
 }
