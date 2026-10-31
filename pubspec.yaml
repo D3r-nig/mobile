@@ -65,7 +65,6 @@ flutter:
 
   assets:
     - assets/logo_transparent.png
-    - assets/itlabcare_logo.svg
 
   # To add assets to your application, add an assets section, like this:
   # assets:
