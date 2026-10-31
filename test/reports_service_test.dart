@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:itlabcare/services/dashboard_service.dart';
 import 'package:itlabcare/services/reports_service.dart';
 import 'package:itlabcare/services/report_submission_service.dart';
@@ -16,7 +18,47 @@ class _TokenProvider implements FirebaseIdTokenProvider {
       'student-id-token';
 }
 
+class _CapturingClient extends http.BaseClient {
+  http.BaseRequest? request;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    this.request = request;
+    return http.StreamedResponse(
+      Stream<List<int>>.value(
+        utf8.encode('{"id":7,"status":"pending_teacher_review"}'),
+      ),
+      201,
+      request: request,
+    );
+  }
+}
+
 void main() {
+  test('submits an optional photo as multipart form data', () async {
+    final file = File('${Directory.systemTemp.path}/itlabcare-report.jpg');
+    await file.writeAsBytes([0xff, 0xd8, 0xff, 0xd9]);
+    addTearDown(() => file.delete());
+    final client = _CapturingClient();
+    final source = FirebaseStudentReportSubmissionDataSource(
+      baseUrl: 'https://api.example.test/api',
+      client: client,
+      tokenProvider: _TokenProvider(),
+    );
+    await source.submitReport(
+      computerId: 7,
+      category: 'hardware',
+      description: 'Keyboard stopped working',
+      priority: 'high',
+      image: XFile(file.path),
+    );
+
+    final multipart = client.request! as http.MultipartRequest;
+    expect(multipart.fields['computer_id'], '7');
+    expect(multipart.files.single.field, 'image');
+    expect(multipart.files.single.filename, 'itlabcare-report.jpg');
+  });
+
   test('submits a mobile report to the teacher-review queue', () async {
     final client = MockClient((request) async {
       expect(request.method, 'POST');
@@ -27,16 +69,17 @@ void main() {
     });
     addTearDown(client.close);
 
-    final result = await FirebaseStudentReportSubmissionDataSource(
-      baseUrl: 'https://api.example.test/api',
-      client: client,
-      tokenProvider: _TokenProvider(),
-    ).submitReport(
-      computerId: 7,
-      category: 'hardware',
-      description: 'Keyboard stopped working',
-      priority: 'high',
-    );
+    final result =
+        await FirebaseStudentReportSubmissionDataSource(
+          baseUrl: 'https://api.example.test/api',
+          client: client,
+          tokenProvider: _TokenProvider(),
+        ).submitReport(
+          computerId: 7,
+          category: 'hardware',
+          description: 'Keyboard stopped working',
+          priority: 'high',
+        );
 
     expect(result['status'], 'pending_teacher_review');
   });

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../widgets/auth_widgets.dart';
 import '../widgets/navigation.dart';
@@ -21,7 +24,14 @@ class ComputerDetailsScreen extends StatelessWidget {
   });
 
   final int computerId;
-  final String assetTag, lab, status, brand, processor, ram, storage, operatingSystem;
+  final String assetTag,
+      lab,
+      status,
+      brand,
+      processor,
+      ram,
+      storage,
+      operatingSystem;
   @override
   Widget build(BuildContext context) => WorkflowScaffold(
     title: 'Computer Details',
@@ -30,11 +40,7 @@ class ComputerDetailsScreen extends StatelessWidget {
       children: [
         ComputerCard(assetTag: assetTag, lab: lab),
         const SizedBox(height: 8),
-        InfoRow(
-          label: 'Status',
-          value: status,
-          valueColor: Color(0xff39a34a),
-        ),
+        InfoRow(label: 'Status', value: status, valueColor: Color(0xff39a34a)),
         InfoRow(label: 'Brand', value: brand),
         InfoRow(label: 'Processor', value: processor),
         InfoRow(label: 'RAM', value: ram),
@@ -51,12 +57,14 @@ class ComputerDetailsScreen extends StatelessWidget {
           color: const Color(0xffffdede),
           textColor: const Color(0xffec6464),
           icon: Icons.warning_amber_outlined,
-          onTap: (context) =>
-              openDissolve(context, ReportProblemScreen(
-                computerId: computerId,
-                assetTag: assetTag,
-                lab: lab,
-              )),
+          onTap: (context) => openDissolve(
+            context,
+            ReportProblemScreen(
+              computerId: computerId,
+              assetTag: assetTag,
+              lab: lab,
+            ),
+          ),
         ),
         const SizedBox(height: 8),
         WorkflowButton(
@@ -64,12 +72,14 @@ class ComputerDetailsScreen extends StatelessWidget {
           color: const Color(0xffe4eaff),
           textColor: const Color(0xff6685e9),
           icon: Icons.history,
-          onTap: (context) =>
-              openDissolve(context, MaintenanceHistoryScreen(
-                computerId: computerId,
-                assetTag: assetTag,
-                lab: lab,
-              )),
+          onTap: (context) => openDissolve(
+            context,
+            MaintenanceHistoryScreen(
+              computerId: computerId,
+              assetTag: assetTag,
+              lab: lab,
+            ),
+          ),
         ),
       ],
     ),
@@ -88,7 +98,8 @@ class MaintenanceHistoryScreen extends StatefulWidget {
   final String assetTag, lab;
 
   @override
-  State<MaintenanceHistoryScreen> createState() => _MaintenanceHistoryScreenState();
+  State<MaintenanceHistoryScreen> createState() =>
+      _MaintenanceHistoryScreenState();
 }
 
 class _MaintenanceHistoryScreenState extends State<MaintenanceHistoryScreen> {
@@ -152,12 +163,15 @@ class _MaintenanceHistoryScreenState extends State<MaintenanceHistoryScreen> {
             }
             return Column(
               children: records
-                  .map((record) => MaintenanceItem(
-                        date: record.scheduledDate,
-                        title: record.title,
-                        technician: 'Technician: ${record.technician ?? 'Unassigned'}',
-                        status: record.status,
-                      ))
+                  .map(
+                    (record) => MaintenanceItem(
+                      date: record.scheduledDate,
+                      title: record.title,
+                      technician:
+                          'Technician: ${record.technician ?? 'Unassigned'}',
+                      status: record.status,
+                    ),
+                  )
                   .toList(),
             );
           },
@@ -192,12 +206,17 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
   String _priority = 'medium';
   bool _submitting = false;
   String? _error;
+  XFile? _image;
+  final _imagePicker = ImagePicker();
 
   @override
   void dispose() {
     _descriptionController.dispose();
-    if (widget.dataSource == null && _dataSource is FirebaseStudentReportSubmissionDataSource) {
-      (_dataSource as FirebaseStudentReportSubmissionDataSource).dispose();
+    if (widget.dataSource == null) {
+      if (_dataSource
+          case final FirebaseStudentReportSubmissionDataSource source) {
+        source.dispose();
+      }
     }
     super.dispose();
   }
@@ -208,16 +227,22 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
       setState(() => _error = 'Please describe the problem.');
       return;
     }
-    setState(() { _submitting = true; _error = null; });
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
     try {
       await _dataSource.submitReport(
         computerId: widget.computerId,
         category: _category,
         description: description,
         priority: _priority,
+        image: _image,
       );
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(noAnimationRoute((_) => const ReportSubmittedScreen()));
+      Navigator.of(
+        context,
+      ).pushReplacement(noAnimationRoute((_) => const ReportSubmittedScreen()));
     } catch (error) {
       if (!mounted) return;
       setState(() => _error = error.toString());
@@ -226,12 +251,45 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Choose from gallery'),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('Take a photo'),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+    final image = await _imagePicker.pickImage(
+      source: source,
+      imageQuality: 85,
+      maxWidth: 1600,
+    );
+    if (image != null && mounted) setState(() => _image = image);
+  }
+
   @override
   Widget build(BuildContext context) => WorkflowScaffold(
     title: 'Report a Problem',
     bottom: ActionButton(
       label: 'Report a Problem',
-      onPressed: _submitting ? null : () { _submit(); },
+      onPressed: _submitting
+          ? null
+          : () {
+              _submit();
+            },
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,26 +328,53 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 5),
-        Container(
-          height: 86,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xffdddddd)),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.camera_alt_outlined,
-                size: 35,
-                color: Color(0xff1264d6),
-              ),
-              Text(
-                'Tap to add photo',
-                style: TextStyle(fontSize: 8, color: Color(0xff777777)),
-              ),
-            ],
+        GestureDetector(
+          onTap: _pickImage,
+          child: Container(
+            height: 86,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xffdddddd)),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: _image == null
+                ? const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.camera_alt_outlined,
+                        size: 35,
+                        color: Color(0xff1264d6),
+                      ),
+                      Text(
+                        'Tap to add photo',
+                        style: TextStyle(fontSize: 8, color: Color(0xff777777)),
+                      ),
+                    ],
+                  )
+                : Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Image.file(
+                          File(_image!.path),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: IconButton(
+                          onPressed: () => setState(() => _image = null),
+                          icon: const Icon(Icons.close, color: Colors.white),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.black54,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ),
         const SizedBox(height: 10),
@@ -306,7 +391,10 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
         ),
         if (_error != null) ...[
           const SizedBox(height: 10),
-          Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 11)),
+          Text(
+            _error!,
+            style: const TextStyle(color: Colors.red, fontSize: 11),
+          ),
         ],
       ],
     ),
@@ -337,7 +425,9 @@ class ReportOptionField extends StatelessWidget {
           child: Text(option, style: const TextStyle(fontSize: 14)),
         ),
     ],
-    onChanged: (value) { if (value != null) onChanged(value); },
+    onChanged: (value) {
+      if (value != null) onChanged(value);
+    },
     decoration: InputDecoration(
       labelStyle: const TextStyle(color: Color(0xff66758a), fontSize: 12),
       prefixIcon: Icon(icon, color: const Color(0xff66758a), size: 20),
