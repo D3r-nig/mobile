@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/auth_widgets.dart';
 import '../widgets/brand_mark.dart';
+import '../services/notification_preferences_service.dart';
 
 class AppNotificationsScreen extends StatefulWidget {
   const AppNotificationsScreen({super.key});
@@ -15,6 +16,53 @@ class _AppNotificationsScreenState extends State<AppNotificationsScreen> {
   bool systemAnnouncements = false;
   bool dailySummary = true;
   bool directCommunications = true;
+  final _service = NotificationPreferencesService();
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  @override
+  void dispose() {
+    _service.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadPreferences() async {
+    try {
+      final preferences = await _service.load();
+      if (!mounted) return;
+      setState(() {
+        reportUpdates = preferences.reportStatusUpdates;
+        maintenanceAlerts = preferences.maintenanceAlerts;
+        systemAnnouncements = preferences.labClosureNotices;
+        dailySummary = preferences.dailySummaryReports;
+        directCommunications = preferences.directCommunications;
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _savePreferences() async {
+    setState(() => _saving = true);
+    try {
+      await _service.save(NotificationPreferences(
+        reportStatusUpdates: reportUpdates,
+        maintenanceAlerts: maintenanceAlerts,
+        labClosureNotices: systemAnnouncements,
+        dailySummaryReports: dailySummary,
+        directCommunications: directCommunications,
+      ));
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to save notification settings.')),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) => PreferenceScaffold(
@@ -22,37 +70,38 @@ class _AppNotificationsScreenState extends State<AppNotificationsScreen> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_saving) const LinearProgressIndicator(minHeight: 2),
         const PreferenceGroupTitle(title: 'REPORT UPDATES'),
         NotificationToggle(
           title: 'Report Status Updates',
           subtitle: 'Get notified when your computer ticket changes status',
           value: reportUpdates,
-          onChanged: (value) => setState(() => reportUpdates = value),
+          onChanged: (value) { setState(() => reportUpdates = value); _savePreferences(); },
         ),
         NotificationToggle(
           title: 'Maintenance Alerts',
           subtitle: 'Get notified about scheduled hardware maintenance',
           value: maintenanceAlerts,
-          onChanged: (value) => setState(() => maintenanceAlerts = value),
+          onChanged: (value) { setState(() => maintenanceAlerts = value); _savePreferences(); },
         ),
         NotificationToggle(
           title: 'Lab Closure Notices',
           subtitle: 'Get notified about temporary lab closures',
           value: systemAnnouncements,
-          onChanged: (value) => setState(() => systemAnnouncements = value),
+          onChanged: (value) { setState(() => systemAnnouncements = value); _savePreferences(); },
         ),
         const PreferenceGroupTitle(title: 'EMAIL NOTIFICATIONS'),
         NotificationToggle(
           title: 'Daily Summary Reports',
           subtitle: 'Receive a summary of reported issues each day',
           value: dailySummary,
-          onChanged: (value) => setState(() => dailySummary = value),
+          onChanged: (value) { setState(() => dailySummary = value); _savePreferences(); },
         ),
         NotificationToggle(
           title: 'Direct Communications',
           subtitle: 'Receive direct messages and updates',
           value: directCommunications,
-          onChanged: (value) => setState(() => directCommunications = value),
+          onChanged: (value) { setState(() => directCommunications = value); _savePreferences(); },
         ),
       ],
     ),

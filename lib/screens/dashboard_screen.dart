@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../widgets/brand_mark.dart';
@@ -18,7 +20,8 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with WidgetsBindingObserver {
   static const ink = Color(0xff11112a);
   static const blue = Color(0xff155bb2);
   late final DashboardDataSource _dataSource =
@@ -26,11 +29,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
   DashboardData? _data;
   Object? _loadError;
   bool _isLoading = true;
+  Timer? _poller;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadDashboard();
+    _poller = Timer.periodic(
+      const Duration(seconds: 15),
+      (_) => _loadDashboard(forceRefresh: true),
+    );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadDashboard(forceRefresh: true);
+    }
   }
 
   Future<void> _loadDashboard({bool forceRefresh = false}) async {
@@ -59,6 +75,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _poller?.cancel();
     if (widget.dataSource == null &&
         _dataSource is FirebaseDashboardDataSource) {
       _dataSource.dispose();
